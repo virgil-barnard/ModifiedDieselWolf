@@ -1,0 +1,9 @@
+torch
+numba
+numpy
+matplotlib
+scikit-learn
+scipy
+jupyter
+typing_extensions>=4.7
+reformer-pytorch
