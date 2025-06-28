@@ -17,8 +17,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Add `requirements-dev.txt` for docs, lint, tests (`469c913`)
 
 ---
-
-- [ ] **Training Loop Migration → PyTorch Lightning**
+- [x] **Training Loop Migration → PyTorch Lightning** (`00a5384`)
 - [x] Scaffold `LightningModule` for classifier (`9d6ce92`)
  - [x] Remove dependency on reformer_pytorch and refactor Demodulation.ipynb and Modulation_Classifier.ipynb to use the transformer module's ReformerModel instead (`d8dfb69`)
 - [x] Move dataset classes to `dieselwolf/data/` (`9d6ce92`)
@@ -71,11 +70,11 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ## 6. Training & Optimisation
 - [ ] **Optimisers & Schedulers**
-  - [ ] Switch default to Lookahead(AdamW)
-  - [ ] Plug cosine LR decay with warm‑up
+  - [x] Switch default to Lookahead(AdamW) (`00a5384`)
+  - [x] Plug cosine LR decay with warm‑up (`00a5384`)
 - [ ] **Mixed Precision + Gradient Accumulation**
-  - [ ] Enable AMP in Trainer
-  - [ ] Tune `accumulate_grad_batches` for batch‑equivalent training
+  - [x] Enable AMP in Trainer (`00a5384`)
+  - [x] Tune `accumulate_grad_batches` for batch‑equivalent training (`00a5384`)
 - [ ] **Checkpoint & Resume**
   - [ ] Save EMA weights
   - [ ] Resume SSL → fine‑tune seamlessly

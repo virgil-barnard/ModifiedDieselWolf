@@ -38,6 +38,13 @@ def parse_args() -> argparse.Namespace:
         default="32",
         help="Trainer precision mode",
     )
+    parser.add_argument("--warmup-steps", type=int, default=0, help="LR warm-up steps")
+    parser.add_argument(
+        "--accumulate-grad-batches",
+        type=int,
+        default=1,
+        help="Gradient accumulation steps",
+    )
     return parser.parse_args()
 
 
@@ -59,7 +66,12 @@ def main() -> None:
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
     backbone = SimpleCNN(args.num_samples, len(train_ds.classes))
-    model = AMRClassifier(backbone, num_classes=len(train_ds.classes), lr=args.lr)
+    model = AMRClassifier(
+        backbone,
+        num_classes=len(train_ds.classes),
+        lr=args.lr,
+        warmup_steps=args.warmup_steps,
+    )
 
     callbacks = [
         ModelCheckpoint(save_top_k=1, monitor="val_loss"),
@@ -71,6 +83,7 @@ def main() -> None:
         callbacks=callbacks,
         accelerator="auto",
         devices=1,
+        accumulate_grad_batches=args.accumulate_grad_batches,
     )
     trainer.fit(model, train_loader, val_loader)
 
