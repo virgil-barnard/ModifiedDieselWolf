@@ -31,7 +31,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [ ] **Complex‑Valued Core**
   - [x] Replace `nn.Conv1d`, `BatchNorm1d`, `Linear` with `ComplexConv1d`, etc. (`2cd4d66`)
   - [x] Replace Replace Reformer with a complex‑valued Transformer (CV‑ViT or CC‑MSNet) (`1cfef0b`)
-  - [ ] Verify weight initialisation & checkpoint I/O
+  - [x] Verify weight initialisation & checkpoint I/O (`6d28f30`)
 - [ ] **Introduce Radio‑Transformers**
   - [ ] Add **MobileRaT** backbone
   - [ ] Add **NMformer** backbone with noise tokens
