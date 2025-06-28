@@ -28,12 +28,12 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 3. Model‑Architecture Upgrades
-- [ ] **Complex‑Valued Core**
+- [x] **Complex‑Valued Core** (`c84d441`)
   - [x] Replace `nn.Conv1d`, `BatchNorm1d`, `Linear` with `ComplexConv1d`, etc. (`2cd4d66`)
   - [x] Replace Replace Reformer with a complex‑valued Transformer (CV‑ViT or CC‑MSNet) (`1cfef0b`)
   - [x] Verify weight initialisation & checkpoint I/O (`6d28f30`)
 - [ ] **Introduce Radio‑Transformers**
-  - [ ] Add **MobileRaT** backbone
+  - [x] Add **MobileRaT** backbone (`c84d441`)
   - [ ] Add **NMformer** backbone with noise tokens
   - [ ] Provide YAML configs for both
 - [ ] **Hybrid Multitask Heads**
