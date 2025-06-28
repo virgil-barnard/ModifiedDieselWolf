@@ -1,5 +1,5 @@
 # Use official PyTorch image with CUDA runtime for GPU support
-FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+FROM nvcr.io/nvidia/pytorch:25.06-py3
 
 WORKDIR /app
 

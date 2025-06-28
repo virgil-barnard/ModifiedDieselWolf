@@ -31,6 +31,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ## 3. Model‑Architecture Upgrades
 - [ ] **Complex‑Valued Core**
   - [ ] Replace `nn.Conv1d`, `BatchNorm1d`, `Linear` with `ComplexConv1d`, etc.
+  - [ ] Replace Replace Reformer with a complex‑valued Transformer (CV‑ViT or CC‑MSNet)
   - [ ] Verify weight initialisation & checkpoint I/O
 - [ ] **Introduce Radio‑Transformers**
   - [ ] Add **MobileRaT** backbone
