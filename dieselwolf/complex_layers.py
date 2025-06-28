@@ -9,12 +9,17 @@ class ComplexConv1d(nn.Module):
         super().__init__()
         self.real = nn.Conv1d(in_channels, out_channels, **kwargs)
         self.imag = nn.Conv1d(in_channels, out_channels, **kwargs)
+        self.reset_parameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_r, x_i = x.chunk(2, dim=1)
         real = self.real(x_r) - self.imag(x_i)
         imag = self.real(x_i) + self.imag(x_r)
         return torch.cat([real, imag], dim=1)
+
+    def reset_parameters(self) -> None:
+        self.real.reset_parameters()
+        self.imag.reset_parameters()
 
 
 class ComplexBatchNorm1d(nn.Module):
@@ -24,12 +29,17 @@ class ComplexBatchNorm1d(nn.Module):
         super().__init__()
         self.real = nn.BatchNorm1d(num_features)
         self.imag = nn.BatchNorm1d(num_features)
+        self.reset_parameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_r, x_i = x.chunk(2, dim=1)
         real = self.real(x_r)
         imag = self.imag(x_i)
         return torch.cat([real, imag], dim=1)
+
+    def reset_parameters(self) -> None:
+        self.real.reset_parameters()
+        self.imag.reset_parameters()
 
 
 class ComplexLinear(nn.Module):
@@ -39,9 +49,14 @@ class ComplexLinear(nn.Module):
         super().__init__()
         self.real = nn.Linear(in_features, out_features, bias=bias)
         self.imag = nn.Linear(in_features, out_features, bias=bias)
+        self.reset_parameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_r, x_i = x.chunk(2, dim=-1)
         real = self.real(x_r) - self.imag(x_i)
         imag = self.real(x_i) + self.imag(x_r)
         return torch.cat([real, imag], dim=-1)
+
+    def reset_parameters(self) -> None:
+        self.real.reset_parameters()
+        self.imag.reset_parameters()
