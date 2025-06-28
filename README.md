@@ -6,11 +6,11 @@ Also, DigitalDemodulationDataset returns the message symbols corresponding to th
 
 Python files contained in repo:
 	
-    Dataset/DigitalModulations.py - Main file containing both modulation and demodulation dataset classes.
-    Dataset/ModulationTypes.py - Functions for generating data for each modulation type.
-    Dataset/TransformsRF.py - PyTorch transforms for physical channel model.
-    Dataset/FilterUtils.py - Filtering utility functions.
-    Dataset/models.py - Model definition for hybrid multitask model and a basic ResNet.
+    dieselwolf/data/DigitalModulations.py - Main file containing both modulation and demodulation dataset classes.
+    dieselwolf/data/ModulationTypes.py - Functions for generating data for each modulation type.
+    dieselwolf/data/TransformsRF.py - PyTorch transforms for physical channel model.
+    dieselwolf/data/FilterUtils.py - Filtering utility functions.
+    dieselwolf/data/models.py - Model definition for hybrid multitask model and a basic ResNet.
 
 Three Jupyter notebooks with examples showing dataset and models in use.
 

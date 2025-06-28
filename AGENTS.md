@@ -9,22 +9,22 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 1. Repository House‑Keeping
-- [ ] **Adopt Coding Standards**
+- [x] **Adopt Coding Standards** (`9d6ce92`)
   - [x] Add `ruff` + `black` pre‑commit hooks (`469c913`)
   - [x] Create `CONTRIBUTING.md` and PR template (`469c913`)
-- [ ] **Environment**
+- [x] **Environment** (`9d6ce92`)
   - [x] Pin dependencies in `pyproject.toml` (`469c913`)
   - [x] Add `requirements-dev.txt` for docs, lint, tests (`469c913`)
 
 ---
 
-## 2. Training Loop Migration → PyTorch Lightning
-- [ ] Scaffold `LightningModule` for classifier
-- [ ] Remove dependency on reformer-pytorch and reformer_pytorch and refactor Demodulation.ipynb and Modulation_Classifier.ipynb 
-- [ ] Move dataset classes to `dieselwolf/data/`
-- [ ] Implement Lightning `Trainer` flags (mixed‑precision, callbacks)
-- [ ] Add `scripts/train_amr.py` CLI
-- [ ] **CI**: GitHub Action to run a 1‑epoch smoke test on push
+- [ ] **Training Loop Migration → PyTorch Lightning**
+- [x] Scaffold `LightningModule` for classifier (`9d6ce92`)
+ - [ ] Remove dependency on reformer-pytorch and reformer_pytorch and refactor Demodulation.ipynb and Modulation_Classifier.ipynb
+- [x] Move dataset classes to `dieselwolf/data/` (`9d6ce92`)
+ - [ ] Implement Lightning `Trainer` flags (mixed‑precision, callbacks)
+ - [ ] Add `scripts/train_amr.py` CLI
+ - [ ] **CI**: GitHub Action to run a 1‑epoch smoke test on push
 
 ---
 
