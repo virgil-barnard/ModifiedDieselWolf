@@ -24,7 +24,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [x] Move dataset classes to `dieselwolf/data/` (`9d6ce92`)
 - [x] Implement Lightning `Trainer` flags (mixed‑precision, callbacks) (`0e8bb61`)
 - [x] Add `scripts/train_amr.py` CLI (`0e8bb61`)
- - [ ] **CI**: GitHub Action to run a 1‑epoch smoke test on push
+ - [x] **CI**: GitHub Action to run a 1‑epoch smoke test on push (`5dcb51d`)
 
 ---
 
@@ -56,9 +56,9 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 5. Channel & Data‑Generation Enhancements
-- [ ] **DopplerShift Transform**
-  - [ ] Fractional‑resample via `torchaudio.functional.resample`
-  - [ ] Unit tests on sample delay accuracy
+- [x] **DopplerShift Transform** (`5dcb51d`)
+  - [x] Fractional‑resample via `torchaudio.functional.resample` (`5dcb51d`)
+  - [x] Unit tests on sample delay accuracy (`5dcb51d`)
 - [ ] **Extended Fading Profiles**
   - [ ] TDL Rayleigh
   - [ ] Rician K‑factor sweep

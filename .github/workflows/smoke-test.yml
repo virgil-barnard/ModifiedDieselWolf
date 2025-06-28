@@ -1,0 +1,19 @@
+name: Smoke Test
+
+on: [push, pull_request]
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run 1-epoch smoke test
+        run: |
+          python scripts/train_amr.py --epochs 1 --batch-size 4 --num-examples 4 --num-samples 64 --precision 32
