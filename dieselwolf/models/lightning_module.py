@@ -21,21 +21,45 @@ class AMRClassifier(pl.LightningModule):
         num_classes: int,
         lr: float = 1e-3,
         warmup_steps: int = 0,
+        predict_snr: bool = False,
     ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["backbone"])
         self.backbone = backbone
         self.criterion = nn.CrossEntropyLoss()
+        self.regression_loss = nn.MSELoss()
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        if predict_snr:
+            self.snr_head = nn.Linear(num_classes, 1)
+        else:
+            self.snr_head = None
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.backbone(x)
+    def forward(self, x: torch.Tensor):
+        logits = self.backbone(x)
+        if self.snr_head is not None:
+            snr = self.snr_head(logits).squeeze(-1)
+            return logits, snr
+        return logits
 
     def training_step(self, batch, batch_idx: int) -> torch.Tensor:
         y = batch["label"]
-        logits = self.forward(batch["data"])
+        out = self.forward(batch["data"])
+        if self.snr_head is not None:
+            logits, snr_pred = out
+        else:
+            logits, snr_pred = out, None
+
         loss = self.criterion(logits, y)
+        if (
+            snr_pred is not None
+            and "metadata" in batch
+            and "SNRdB" in batch["metadata"]
+        ):
+            snr_target = batch["metadata"]["SNRdB"].float()
+            snr_loss = self.regression_loss(snr_pred, snr_target)
+            loss = loss + snr_loss
+            self.log("train_snr_loss", snr_loss)
         self.train_acc(logits, y)
         self.log("train_loss", loss)
         self.log("train_acc", self.train_acc, prog_bar=True)
@@ -43,8 +67,22 @@ class AMRClassifier(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx: int) -> None:
         y = batch["label"]
-        logits = self.forward(batch["data"])
+        out = self.forward(batch["data"])
+        if self.snr_head is not None:
+            logits, snr_pred = out
+        else:
+            logits, snr_pred = out, None
+
         loss = self.criterion(logits, y)
+        if (
+            snr_pred is not None
+            and "metadata" in batch
+            and "SNRdB" in batch["metadata"]
+        ):
+            snr_target = batch["metadata"]["SNRdB"].float()
+            snr_loss = self.regression_loss(snr_pred, snr_target)
+            loss = loss + snr_loss
+            self.log("val_snr_loss", snr_loss, prog_bar=True)
         self.val_acc(logits, y)
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", self.val_acc, prog_bar=True)
