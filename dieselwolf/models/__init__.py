@@ -2,5 +2,6 @@
 
 from .lightning_module import AMRClassifier
 from .complex_transformer import ComplexTransformerEncoder
+from .mobile_rat import MobileRaT
 
-__all__ = ["AMRClassifier", "ComplexTransformerEncoder"]
+__all__ = ["AMRClassifier", "ComplexTransformerEncoder", "MobileRaT"]

@@ -34,7 +34,13 @@ class ComplexTransformerEncoderLayer(nn.Module):
         src = src + self.dropout1(attn_output)
         src = self.norm1(src)
 
-        ff = self.linear2(self.dropout(self.activation(self.linear1(src))))
+        # feed-forward expects features in last dimension
+        ff = src.permute(0, 2, 1)
+        ff = self.linear1(ff)
+        ff = self.activation(ff)
+        ff = self.dropout(ff)
+        ff = self.linear2(ff)
+        ff = ff.permute(0, 2, 1)
         src = src + self.dropout2(ff)
         src = self.norm2(src)
         return src
