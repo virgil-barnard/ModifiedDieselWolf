@@ -38,7 +38,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Provide YAML configs for both (`78d6a02`)
 - [ ] **Hybrid Multitask Heads**
   - [x] Append SNR‑regression head (`df5681a`)
-  - [ ] Append channel‑parameter (CFO & phase) head
+  - [x] Append channel‑parameter (CFO & phase) head (`02e77b3`)
   - [ ] Balance multi‑loss weights via grid search
 
 ---

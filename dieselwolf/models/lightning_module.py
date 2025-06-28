@@ -22,6 +22,7 @@ class AMRClassifier(pl.LightningModule):
         lr: float = 1e-3,
         warmup_steps: int = 0,
         predict_snr: bool = False,
+        predict_channel: bool = False,
     ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["backbone"])
@@ -34,21 +35,36 @@ class AMRClassifier(pl.LightningModule):
             self.snr_head = nn.Linear(num_classes, 1)
         else:
             self.snr_head = None
+        if predict_channel:
+            self.channel_head = nn.Linear(num_classes, 2)
+        else:
+            self.channel_head = None
 
     def forward(self, x: torch.Tensor):
         logits = self.backbone(x)
+        outputs = [logits]
         if self.snr_head is not None:
-            snr = self.snr_head(logits).squeeze(-1)
-            return logits, snr
-        return logits
+            outputs.append(self.snr_head(logits).squeeze(-1))
+        if self.channel_head is not None:
+            outputs.append(self.channel_head(logits))
+        if len(outputs) == 1:
+            return outputs[0]
+        if len(outputs) == 2:
+            return outputs[0], outputs[1]
+        return outputs[0], outputs[1], outputs[2]
 
     def training_step(self, batch, batch_idx: int) -> torch.Tensor:
         y = batch["label"]
         out = self.forward(batch["data"])
-        if self.snr_head is not None:
-            logits, snr_pred = out
-        else:
-            logits, snr_pred = out, None
+        logits = out[0] if isinstance(out, tuple) else out
+        snr_pred = None
+        channel_pred = None
+        if self.snr_head is not None and self.channel_head is not None:
+            _, snr_pred, channel_pred = out
+        elif self.snr_head is not None:
+            _, snr_pred = out
+        elif self.channel_head is not None:
+            _, channel_pred = out
 
         loss = self.criterion(logits, y)
         if (
@@ -60,6 +76,22 @@ class AMRClassifier(pl.LightningModule):
             snr_loss = self.regression_loss(snr_pred, snr_target)
             loss = loss + snr_loss
             self.log("train_snr_loss", snr_loss)
+        if (
+            channel_pred is not None
+            and "metadata" in batch
+            and "CarrierFrequencyOffset" in batch["metadata"]
+            and "CarrierPhaseOffset" in batch["metadata"]
+        ):
+            target = torch.stack(
+                [
+                    batch["metadata"]["CarrierFrequencyOffset"].float(),
+                    batch["metadata"]["CarrierPhaseOffset"].float(),
+                ],
+                dim=1,
+            )
+            chan_loss = self.regression_loss(channel_pred, target)
+            loss = loss + chan_loss
+            self.log("train_channel_loss", chan_loss)
         self.train_acc(logits, y)
         self.log("train_loss", loss)
         self.log("train_acc", self.train_acc, prog_bar=True)
@@ -68,10 +100,15 @@ class AMRClassifier(pl.LightningModule):
     def validation_step(self, batch, batch_idx: int) -> None:
         y = batch["label"]
         out = self.forward(batch["data"])
-        if self.snr_head is not None:
-            logits, snr_pred = out
-        else:
-            logits, snr_pred = out, None
+        logits = out[0] if isinstance(out, tuple) else out
+        snr_pred = None
+        channel_pred = None
+        if self.snr_head is not None and self.channel_head is not None:
+            _, snr_pred, channel_pred = out
+        elif self.snr_head is not None:
+            _, snr_pred = out
+        elif self.channel_head is not None:
+            _, channel_pred = out
 
         loss = self.criterion(logits, y)
         if (
@@ -83,6 +120,22 @@ class AMRClassifier(pl.LightningModule):
             snr_loss = self.regression_loss(snr_pred, snr_target)
             loss = loss + snr_loss
             self.log("val_snr_loss", snr_loss, prog_bar=True)
+        if (
+            channel_pred is not None
+            and "metadata" in batch
+            and "CarrierFrequencyOffset" in batch["metadata"]
+            and "CarrierPhaseOffset" in batch["metadata"]
+        ):
+            target = torch.stack(
+                [
+                    batch["metadata"]["CarrierFrequencyOffset"].float(),
+                    batch["metadata"]["CarrierPhaseOffset"].float(),
+                ],
+                dim=1,
+            )
+            chan_loss = self.regression_loss(channel_pred, target)
+            loss = loss + chan_loss
+            self.log("val_channel_loss", chan_loss, prog_bar=True)
         self.val_acc(logits, y)
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", self.val_acc, prog_bar=True)
