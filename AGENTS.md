@@ -20,6 +20,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ## 2. Training Loop Migration → PyTorch Lightning
 - [ ] Scaffold `LightningModule` for classifier
+- [ ] Remove dependency on reformer-pytorch and reformer_pytorch and refactor Demodulation.ipynb and Modulation_Classifier.ipynb 
 - [ ] Move dataset classes to `dieselwolf/data/`
 - [ ] Implement Lightning `Trainer` flags (mixed‑precision, callbacks)
 - [ ] Add `scripts/train_amr.py` CLI
