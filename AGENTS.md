@@ -22,8 +22,8 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [x] Scaffold `LightningModule` for classifier (`9d6ce92`)
  - [x] Remove dependency on reformer_pytorch and refactor Demodulation.ipynb and Modulation_Classifier.ipynb to use the transformer module's ReformerModel instead (`d8dfb69`)
 - [x] Move dataset classes to `dieselwolf/data/` (`9d6ce92`)
- - [ ] Implement Lightning `Trainer` flags (mixed‑precision, callbacks)
- - [ ] Add `scripts/train_amr.py` CLI
+- [x] Implement Lightning `Trainer` flags (mixed‑precision, callbacks) (`0e8bb61`)
+- [x] Add `scripts/train_amr.py` CLI (`0e8bb61`)
  - [ ] **CI**: GitHub Action to run a 1‑epoch smoke test on push
 
 ---

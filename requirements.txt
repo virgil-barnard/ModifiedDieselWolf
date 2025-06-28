@@ -7,3 +7,5 @@ scipy
 jupyter
 typing_extensions>=4.7
 transformers
+pytorch-lightning
+torchmetrics
