@@ -1,3 +1,4 @@
+torch
 pre-commit
 black==25.1.0
 ruff==0.4.3
