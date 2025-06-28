@@ -1,0 +1,9 @@
+# Default configuration for NMformer backbone
+backbone: NMformer
+seq_len: 256
+num_classes: 10
+params:
+  d_model: 32
+  nhead: 4
+  num_layers: 2
+  num_noise_tokens: 4

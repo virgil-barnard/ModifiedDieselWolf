@@ -34,8 +34,8 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Verify weight initialisation & checkpoint I/O (`6d28f30`)
 - [ ] **Introduce Radio‑Transformers**
   - [x] Add **MobileRaT** backbone (`c84d441`)
-  - [ ] Add **NMformer** backbone with noise tokens
-  - [ ] Provide YAML configs for both
+  - [x] Add **NMformer** backbone with noise tokens (`78d6a02`)
+  - [x] Provide YAML configs for both (`78d6a02`)
 - [ ] **Hybrid Multitask Heads**
   - [ ] Append SNR‑regression head
   - [ ] Append channel‑parameter (CFO & phase) head
