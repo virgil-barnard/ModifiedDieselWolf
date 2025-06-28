@@ -1,7 +1,6 @@
 # pytorch transforms for RF IQ data.
 import numpy as np
 import torch
-import torchaudio.functional as AF
 
 
 class CarrierPhase(object):  # carrier phase offset transform.
@@ -1308,8 +1307,16 @@ class DopplerShift(object):
         self.keys = data_keys
 
     def _resample(self, tensor: torch.Tensor) -> torch.Tensor:
-        target_rate = self.sample_rate + self.shift_hz
-        resampled = AF.resample(tensor, self.sample_rate, target_rate)
+        """Resample ``tensor`` using linear interpolation."""
+        target_len = int(
+            round(
+                tensor.shape[-1] * (self.sample_rate + self.shift_hz) / self.sample_rate
+            )
+        )
+        x = tensor.unsqueeze(0)  # add batch dim for interpolate
+        resampled = torch.nn.functional.interpolate(
+            x, size=target_len, mode="linear", align_corners=False
+        ).squeeze(0)
         if resampled.shape[-1] > tensor.shape[-1]:
             resampled = resampled[..., : tensor.shape[-1]]
         elif resampled.shape[-1] < tensor.shape[-1]:
