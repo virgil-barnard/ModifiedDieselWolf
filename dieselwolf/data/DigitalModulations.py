@@ -2,8 +2,8 @@ __author__ = "Brian Shevitski"
 __email__ = "brian.shevitski@gmail.com"
 
 import numpy as np
-from Dataset.ModulationTypes import GetModulation
-from Dataset.FilterUtils import RRC_filt,RRC_filt_RealSpace
+from .ModulationTypes import GetModulation
+from .FilterUtils import RRC_filt, RRC_filt_RealSpace
 from torch.utils.data import Dataset
 from scipy.signal import upfirdn
 import torch,numba
