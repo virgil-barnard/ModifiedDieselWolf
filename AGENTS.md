@@ -10,11 +10,11 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ## 1. Repository House‑Keeping
 - [ ] **Adopt Coding Standards**
-  - [ ] Add `ruff` + `black` pre‑commit hooks
-  - [ ] Create `CONTRIBUTING.md` and PR template  
+  - [x] Add `ruff` + `black` pre‑commit hooks (`469c913`)
+  - [x] Create `CONTRIBUTING.md` and PR template (`469c913`)
 - [ ] **Environment**
-  - [ ] Pin dependencies in `pyproject.toml`
-  - [ ] Add `requirements-dev.txt` for docs, lint, tests
+  - [x] Pin dependencies in `pyproject.toml` (`469c913`)
+  - [x] Add `requirements-dev.txt` for docs, lint, tests (`469c913`)
 
 ---
 
