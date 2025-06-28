@@ -18,3 +18,5 @@ Three Jupyter notebooks with examples showing dataset and models in use.
     Modulation_Classification: Training a hybrid model to perform automatic modulation recognition.
     Demodulation: Training a model to demodulate a signal.
 
+docker build -t dieselmod .
+docker run --gpus all -it --rm -p 8888:8888 -v ${pwd}:/app dieselmod
