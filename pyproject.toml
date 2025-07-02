@@ -17,6 +17,7 @@ dependencies = [
     "transformers==4.34.1",
     "pytorch-lightning==2.2.1",
     "torchmetrics==0.11.4",
+    "onnxruntime==1.22.0",
 ]
 
 [tool.black]

@@ -9,3 +9,4 @@ typing_extensions>=4.7
 transformers
 pytorch-lightning
 torchmetrics
+onnxruntime==1.22.0
