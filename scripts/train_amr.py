@@ -2,7 +2,11 @@ import argparse
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.callbacks import (
+    LearningRateMonitor,
+    ModelCheckpoint,
+    EMA,
+)
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -45,6 +49,12 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help="Gradient accumulation steps",
     )
+    parser.add_argument(
+        "--ema-decay",
+        type=float,
+        default=0.0,
+        help="Exponential moving average decay. Set 0 to disable.",
+    )
     return parser.parse_args()
 
 
@@ -77,6 +87,8 @@ def main() -> None:
         ModelCheckpoint(save_top_k=1, monitor="val_loss"),
         LearningRateMonitor(),
     ]
+    if args.ema_decay > 0:
+        callbacks.append(EMA(decay=args.ema_decay, use_ema_weights=True))
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         precision=args.precision,
