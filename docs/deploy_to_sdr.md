@@ -10,12 +10,18 @@ Reduce model size by removing 50% of the smallest weights:
 python scripts/prune.py --checkpoint model.ckpt --output pruned.ckpt
 ```
 
+After pruning, fine-tune the model for a few epochs to regain accuracy:
+
+```bash
+python scripts/finetune_pruned.py --checkpoint pruned.ckpt --output finetuned.ckpt
+```
+
 ## 2. Export to ONNX
 
 Convert the pruned weights into the portable ONNX format:
 
 ```bash
-python scripts/export_onnx.py --checkpoint pruned.ckpt --output model.onnx
+python scripts/export_onnx.py --checkpoint finetuned.ckpt --output model.onnx
 ```
 
 ## 3. Quantise to INT8
@@ -26,7 +32,15 @@ Apply post-training quantisation using ONNX Runtime:
 python scripts/quantize_onnx.py --input model.onnx --output model_int8.onnx
 ```
 
-## 4. Example inference script
+## 4. Benchmark latency
+
+Measure inference latency of the quantised model:
+
+```bash
+python scripts/benchmark_onnx.py --model model_int8.onnx
+```
+
+## 5. Example inference script
 
 ```python
 import numpy as np

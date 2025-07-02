@@ -62,3 +62,7 @@ class Lookahead(Optimizer):
         self.step_counter = state_dict["step_counter"]
         self.k = state_dict["k"]
         self.alpha = state_dict["alpha"]
+
+    @property
+    def state(self) -> Dict:
+        return self.optimizer.state
