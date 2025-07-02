@@ -45,8 +45,8 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ## 4. Representation Learning
 - [ ] **Self‑Supervised Pre‑Training (SSL)**
-  - [ ] Implement MoCo‑v3 queue & momentum encoder
-  - [ ] Create `RFAugment` with: random CFO, time cropping, IQ swap
+  - [x] Implement MoCo‑v3 queue & momentum encoder (`335881d`)
+  - [x] Create `RFAugment` with: random CFO, time cropping, IQ swap (`335881d`)
   - [ ] Pre‑train on synthetic + RadioML 2016/2018
 - [ ] **Curriculum over SNR**
   - [ ] Schedule: start at +20 dB, lower by 5 dB every plateau
@@ -96,11 +96,11 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ## 8. Evaluation & Benchmarks
 - [ ] **Datasets**
-  - [ ] Integrate RadioML 2016, 2018, and DeepSig RML22 loaders
+  - [x] Integrate RadioML 2016, 2018, and DeepSig RML22 loaders (`335881d`)
 - [ ] **Metrics**
-  - [ ] Accuracy vs SNR curve
-  - [ ] Confusion matrix at 0 dB
-  - [ ] Inference latency on CPU & GPU
+  - [x] Accuracy vs SNR curve (`335881d`)
+  - [x] Confusion matrix at 0 dB (`335881d`)
+  - [x] Inference latency on CPU & GPU (`335881d`)
 - [ ] **Reproducibility**
   - [ ] Dockerfile with exact CUDA/cuDNN
   - [ ] GitHub Action: regenerate benchmark plots on push to `main`

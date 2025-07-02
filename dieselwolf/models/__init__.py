@@ -4,5 +4,12 @@ from .lightning_module import AMRClassifier
 from .complex_transformer import ComplexTransformerEncoder
 from .mobile_rat import MobileRaT
 from .nmformer import NMformer
+from .moco_v3 import MoCoV3
 
-__all__ = ["AMRClassifier", "ComplexTransformerEncoder", "MobileRaT", "NMformer"]
+__all__ = [
+    "AMRClassifier",
+    "ComplexTransformerEncoder",
+    "MobileRaT",
+    "NMformer",
+    "MoCoV3",
+]
