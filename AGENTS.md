@@ -83,12 +83,12 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ## 7. Model Compression & Deployment
 - [ ] **Pruning**
   - [x] Global magnitude prune to 50 % (`c21a776`)
-  - [ ] Re‑fine‑tune 3 epochs to regain accuracy
+  - [x] Re‑fine‑tune 3 epochs to regain accuracy (`e9775b9`)
 - [ ] **INT8 Quantisation**
   - [x] Export `.onnx` model (`c21a776`)
   - [x] Quantise with ONNX‑Runtime PTQ (`c21a776`)
-  - [ ] Benchmark on Jetson‑Nano / Raspberry Pi
-- [ ] **Documentation**
+  - [x] Benchmark on Jetson‑Nano / Raspberry Pi (`e9775b9`)
+- [x] **Documentation** (`e9775b9`)
   - [x] Write “Deploy to SDR” guide with example Python script (`c21a776`)
 
 ---
