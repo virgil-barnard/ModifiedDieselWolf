@@ -36,10 +36,10 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Add **MobileRaT** backbone (`c84d441`)
   - [x] Add **NMformer** backbone with noise tokens (`78d6a02`)
   - [x] Provide YAML configs for both (`78d6a02`)
-- [ ] **Hybrid Multitask Heads**
+- [x] **Hybrid Multitask Heads** (`6c46bf6`)
   - [x] Append SNR‑regression head (`df5681a`)
   - [x] Append channel‑parameter (CFO & phase) head (`02e77b3`)
-  - [ ] Balance multi‑loss weights via grid search
+  - [x] Balance multi‑loss weights via grid search (`6c46bf6`)
 
 ---
 
@@ -58,7 +58,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [x] **DopplerShift Transform** (`5dcb51d`)
   - [x] Fractional‑resample via `torchaudio.functional.resample` (`5dcb51d`)
   - [x] Unit tests on sample delay accuracy (`5dcb51d`)
-- [ ] **Extended Fading Profiles**
+- [x] **Extended Fading Profiles** (`83b3629`)
   - [x] TDL Rayleigh (`7f76c44`)
   - [x] Rician K‑factor sweep (`83b3629`)
   - [x] Nakagami‑m option (`83b3629`)
@@ -69,10 +69,10 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 6. Training & Optimisation
-- [ ] **Optimisers & Schedulers**
+- [x] **Optimisers & Schedulers** (`00a5384`)
   - [x] Switch default to Lookahead(AdamW) (`00a5384`)
   - [x] Plug cosine LR decay with warm‑up (`00a5384`)
-- [ ] **Mixed Precision + Gradient Accumulation**
+- [x] **Mixed Precision + Gradient Accumulation** (`00a5384`)
   - [x] Enable AMP in Trainer (`00a5384`)
   - [x] Tune `accumulate_grad_batches` for batch‑equivalent training (`00a5384`)
 - [ ] **Checkpoint & Resume**

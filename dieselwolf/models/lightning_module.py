@@ -23,6 +23,8 @@ class AMRClassifier(pl.LightningModule):
         warmup_steps: int = 0,
         predict_snr: bool = False,
         predict_channel: bool = False,
+        snr_weight: float = 1.0,
+        channel_weight: float = 1.0,
     ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["backbone"])
@@ -74,7 +76,7 @@ class AMRClassifier(pl.LightningModule):
         ):
             snr_target = batch["metadata"]["SNRdB"].float()
             snr_loss = self.regression_loss(snr_pred, snr_target)
-            loss = loss + snr_loss
+            loss = loss + self.hparams.snr_weight * snr_loss
             self.log("train_snr_loss", snr_loss)
         if (
             channel_pred is not None
@@ -90,7 +92,7 @@ class AMRClassifier(pl.LightningModule):
                 dim=1,
             )
             chan_loss = self.regression_loss(channel_pred, target)
-            loss = loss + chan_loss
+            loss = loss + self.hparams.channel_weight * chan_loss
             self.log("train_channel_loss", chan_loss)
         self.train_acc(logits, y)
         self.log("train_loss", loss)
@@ -118,7 +120,7 @@ class AMRClassifier(pl.LightningModule):
         ):
             snr_target = batch["metadata"]["SNRdB"].float()
             snr_loss = self.regression_loss(snr_pred, snr_target)
-            loss = loss + snr_loss
+            loss = loss + self.hparams.snr_weight * snr_loss
             self.log("val_snr_loss", snr_loss, prog_bar=True)
         if (
             channel_pred is not None
@@ -134,7 +136,7 @@ class AMRClassifier(pl.LightningModule):
                 dim=1,
             )
             chan_loss = self.regression_loss(channel_pred, target)
-            loss = loss + chan_loss
+            loss = loss + self.hparams.channel_weight * chan_loss
             self.log("val_channel_loss", chan_loss, prog_bar=True)
         self.val_acc(logits, y)
         self.log("val_loss", loss, prog_bar=True)
