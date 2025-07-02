@@ -95,15 +95,15 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 8. Evaluation & Benchmarks
-- [ ] **Datasets**
+- [x] **Datasets**
   - [x] Integrate RadioML 2016, 2018, and DeepSig RML22 loaders (`335881d`)
-- [ ] **Metrics**
+- [x] **Metrics**
   - [x] Accuracy vs SNR curve (`335881d`)
   - [x] Confusion matrix at 0 dB (`335881d`)
   - [x] Inference latency on CPU & GPU (`335881d`)
-- [ ] **Reproducibility**
-  - [x] Dockerfile with exact CUDA/cuDNN (`a8e39db`) 
-  - [ ] GitHub Action: regenerate benchmark plots on push to `main`
+- [x] **Reproducibility**
+  - [x] Dockerfile with exact CUDA/cuDNN (`a8e39db`)
+  - [x] GitHub Action: regenerate benchmark plots on push to `main` (`f4cc76e`)
 
 ---
 
