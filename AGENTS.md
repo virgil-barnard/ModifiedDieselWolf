@@ -81,10 +81,10 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 7. Model Compression & Deployment
-- [ ] **Pruning**
+- [x] **Pruning** (`6bd8f81`)
   - [x] Global magnitude prune to 50 % (`c21a776`)
   - [x] Re‑fine‑tune 3 epochs to regain accuracy (`e9775b9`)
-- [ ] **INT8 Quantisation**
+- [x] **INT8 Quantisation** (`6bd8f81`)
   - [x] Export `.onnx` model (`c21a776`)
   - [x] Quantise with ONNX‑Runtime PTQ (`c21a776`)
   - [x] Benchmark on Jetson‑Nano / Raspberry Pi (`e9775b9`)
@@ -107,9 +107,9 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 ---
 
 ## 9. Project Management
-- [ ] **GitHub Projects Board**
-  - [ ] Map these check‑boxes to issues
-  - [ ] Automate “Done” column via PR merge events
+- [x] **GitHub Projects Board** (`d3a5d31`)
+  - [x] Map these check‑boxes to issues (`d3a5d31`)
+  - [x] Automate “Done” column via PR merge events (`d3a5d31`)
 - [ ] **Milestone Labels**
   - [ ] `v0.2-ssl`, `v0.3-transformer`, `v1.0-release`
 
