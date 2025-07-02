@@ -76,7 +76,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Enable AMP in Trainer (`00a5384`)
   - [x] Tune `accumulate_grad_batches` for batch‑equivalent training (`00a5384`)
 - [ ] **Checkpoint & Resume**
-  - [ ] Save EMA weights
+  - [x] Save EMA weights (`ee33620`)
   - [ ] Resume SSL → fine‑tune seamlessly
 
 ---
