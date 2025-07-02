@@ -164,3 +164,13 @@ class AMRClassifier(pl.LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": scheduler,
         }
+
+    def load_moco_weights(self, checkpoint_path: str) -> None:
+        """Load encoder weights from a MoCo-v3 checkpoint."""
+        ckpt = torch.load(checkpoint_path, map_location="cpu")
+        state_dict = ckpt.get("state_dict", ckpt)
+        backbone_state = {}
+        for k, v in state_dict.items():
+            if k.startswith("encoder_q."):
+                backbone_state[k[len("encoder_q.") :]] = v
+        self.backbone.load_state_dict(backbone_state, strict=False)

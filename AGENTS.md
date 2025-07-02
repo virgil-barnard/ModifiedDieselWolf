@@ -47,10 +47,10 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [ ] **Self‑Supervised Pre‑Training (SSL)**
   - [x] Implement MoCo‑v3 queue & momentum encoder (`335881d`)
   - [x] Create `RFAugment` with: random CFO, time cropping, IQ swap (`335881d`)
-  - [ ] Pre‑train on synthetic + RadioML 2016/2018
+  - [x] Pre‑train on synthetic + RadioML 2016/2018 (`a8e39db`) 
 - [ ] **Curriculum over SNR**
-  - [ ] Schedule: start at +20 dB, lower by 5 dB every plateau
-  - [ ] Add callback to adjust sampling weights
+  - [x] Schedule: start at +20 dB, lower by 5 dB every plateau (`a8e39db`) 
+  - [x] Add callback to adjust sampling weights (`a8e39db`) 
 
 ---
 
@@ -77,7 +77,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Tune `accumulate_grad_batches` for batch‑equivalent training (`00a5384`)
 - [ ] **Checkpoint & Resume**
   - [x] Save EMA weights (`ee33620`)
-  - [ ] Resume SSL → fine‑tune seamlessly
+  - [x] Resume SSL → fine‑tune seamlessly (`a8e39db`) 
 
 ---
 
@@ -102,7 +102,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Confusion matrix at 0 dB (`335881d`)
   - [x] Inference latency on CPU & GPU (`335881d`)
 - [ ] **Reproducibility**
-  - [ ] Dockerfile with exact CUDA/cuDNN
+  - [x] Dockerfile with exact CUDA/cuDNN (`a8e39db`) 
   - [ ] GitHub Action: regenerate benchmark plots on push to `main`
 
 ---
