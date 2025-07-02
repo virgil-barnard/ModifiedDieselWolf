@@ -60,8 +60,8 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Unit tests on sample delay accuracy (`5dcb51d`)
 - [ ] **Extended Fading Profiles**
   - [x] TDL Rayleigh (`7f76c44`)
-  - [ ] Rician K‑factor sweep
-  - [ ] Nakagami‑m option
+  - [x] Rician K‑factor sweep (`83b3629`)
+  - [x] Nakagami‑m option (`83b3629`)
 - [ ] **Interference Simulation**
   - [ ] Add co‑channel QPSK interferer mix‑in
   - [ ] Label jammer SNR for possible auxiliary training
