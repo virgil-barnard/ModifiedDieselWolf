@@ -7,6 +7,9 @@ from pytorch_lightning.callbacks import (
     ModelCheckpoint,
     EMA,
 )
+
+from dieselwolf.callbacks import SNRCurriculumCallback
+from dieselwolf.data.TransformsRF import AWGN
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -55,6 +58,18 @@ def parse_args() -> argparse.Namespace:
         default=0.0,
         help="Exponential moving average decay. Set 0 to disable.",
     )
+    parser.add_argument(
+        "--snr-start", type=int, default=20, help="Starting SNR for curriculum"
+    )
+    parser.add_argument(
+        "--snr-patience", type=int, default=2, help="Epochs to wait before lowering SNR"
+    )
+    parser.add_argument(
+        "--ssl-checkpoint",
+        type=str,
+        default=None,
+        help="Path to MoCo checkpoint for fine-tuning",
+    )
     return parser.parse_args()
 
 
@@ -65,6 +80,7 @@ def main() -> None:
         num_examples=args.num_examples,
         num_samples=args.num_samples,
         return_message=False,
+        transform=AWGN(args.snr_start),
     )
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
 
@@ -72,6 +88,7 @@ def main() -> None:
         num_examples=max(1, args.num_examples // 4),
         num_samples=args.num_samples,
         return_message=False,
+        transform=AWGN(args.snr_start),
     )
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
@@ -82,6 +99,8 @@ def main() -> None:
         lr=args.lr,
         warmup_steps=args.warmup_steps,
     )
+    if args.ssl_checkpoint:
+        model.load_moco_weights(args.ssl_checkpoint)
 
     callbacks = [
         ModelCheckpoint(save_top_k=1, monitor="val_loss"),
@@ -89,6 +108,11 @@ def main() -> None:
     ]
     if args.ema_decay > 0:
         callbacks.append(EMA(decay=args.ema_decay, use_ema_weights=True))
+    callbacks.append(
+        SNRCurriculumCallback(
+            train_ds, start_snr=args.snr_start, patience=args.snr_patience
+        )
+    )
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         precision=args.precision,
