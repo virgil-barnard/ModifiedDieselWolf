@@ -1,6 +1,7 @@
 # pytorch transforms for RF IQ data.
 import numpy as np
 import torch
+import math
 
 
 class CarrierPhase(object):  # carrier phase offset transform.
@@ -1408,3 +1409,65 @@ class TDLRayleigh(object):
                     for key in self.keys:
                         item[key][idx] = self._apply(item[key][idx], h_r, h_i)
         return item
+
+
+class TDLRician(TDLRayleigh):
+    """Time-delay line Rician fading with constant LOS component."""
+
+    def __init__(
+        self,
+        delays: list[float],
+        avg_gains_dB: list[float],
+        sample_rate: float,
+        k_factor_dB: float,
+        batch: bool = False,
+        data_keys: bool | list[str] = False,
+    ) -> None:
+        super().__init__(delays, avg_gains_dB, sample_rate, batch, data_keys)
+        self.k_linear = 10 ** (k_factor_dB / 10)
+
+    def _generate_impulse(self) -> tuple[torch.Tensor, torch.Tensor]:
+        sample_delays = torch.round(self.delays * self.sample_rate).to(torch.long)
+        max_delay = int(sample_delays.max().item())
+        h_real = torch.zeros(max_delay + 1)
+        h_imag = torch.zeros(max_delay + 1)
+        for d, gain_db in zip(sample_delays, self.avg_gains_dB):
+            power = 10 ** (gain_db / 10)
+            los_amp = math.sqrt(self.k_linear / (self.k_linear + 1) * power)
+            std = math.sqrt(power / (self.k_linear + 1)) / math.sqrt(2)
+            h_real[d] += los_amp + torch.randn(1).squeeze() * std
+            h_imag[d] += torch.randn(1).squeeze() * std
+        return h_real, h_imag
+
+
+class TDLNakagami(TDLRayleigh):
+    """Time-delay line Nakagami-m fading."""
+
+    def __init__(
+        self,
+        delays: list[float],
+        avg_gains_dB: list[float],
+        sample_rate: float,
+        m: float,
+        batch: bool = False,
+        data_keys: bool | list[str] = False,
+    ) -> None:
+        if m <= 0:
+            raise ValueError("`m` must be > 0")
+        super().__init__(delays, avg_gains_dB, sample_rate, batch, data_keys)
+        self.m = m
+
+    def _generate_impulse(self) -> tuple[torch.Tensor, torch.Tensor]:
+        sample_delays = torch.round(self.delays * self.sample_rate).to(torch.long)
+        max_delay = int(sample_delays.max().item())
+        h_real = torch.zeros(max_delay + 1)
+        h_imag = torch.zeros(max_delay + 1)
+        for d, gain_db in zip(sample_delays, self.avg_gains_dB):
+            power = 10 ** (gain_db / 10)
+            scale = power / self.m
+            gamma = torch.distributions.Gamma(self.m, scale)
+            amp = float(gamma.sample().sqrt())
+            phase = float(torch.rand(1)) * 2 * math.pi
+            h_real[d] += amp * math.cos(phase)
+            h_imag[d] += amp * math.sin(phase)
+        return h_real, h_imag
