@@ -490,6 +490,52 @@ class RandomAWGN(object):  # Noise transform, in dB.
         return item
 
 
+class CoChannelQPSKInterferer(object):
+    """Add QPSK interference at a given signal-to-interference ratio."""
+
+    def __init__(
+        self,
+        sir_dB: float,
+        batch: bool = False,
+        data_keys: bool | list[str] = False,
+        seed: int | None = None,
+    ) -> None:
+        self.sir_dB = float(sir_dB)
+        self.batch = batch
+        self.keys = data_keys
+        self.rng = np.random.default_rng(seed)
+
+    def _mix(self, tensor: torch.Tensor) -> torch.Tensor:
+        num_samp = tensor.shape[-1]
+        symbols = self.rng.integers(0, 4, size=num_samp)
+        i = np.cos(np.pi / 4 + np.pi / 2 * symbols)
+        q = np.sin(np.pi / 4 + np.pi / 2 * symbols)
+        interferer = torch.tensor([i, q], dtype=tensor.dtype)
+        gamma = 10 ** (self.sir_dB / 10.0)
+        p_sig = tensor.pow(2).mean()
+        p_int = interferer.pow(2).mean()
+        scale = torch.sqrt(p_sig / (p_int * gamma))
+        return tensor + interferer * scale
+
+    def __call__(self, item):
+        if not self.batch:
+            item["metadata"]["JammerSNRdB"] = self.sir_dB
+            if not self.keys:
+                item["data"] = self._mix(item["data"])
+            else:
+                for key in self.keys:
+                    item[key] = self._mix(item[key])
+        else:
+            for idx in range(len(item["metadata"]["dt"])):
+                item["metadata"]["JammerSNRdB"][idx] = self.sir_dB
+                if not self.keys:
+                    item["data"][idx] = self._mix(item["data"][idx])
+                else:
+                    for key in self.keys:
+                        item[key][idx] = self._mix(item[key][idx])
+        return item
+
+
 class Normalize_Amplitude(object):
     def __init__(self, amp=1, batch=False, data_keys=False):
         self.stabilizer = 1e-18
