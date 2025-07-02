@@ -59,7 +59,7 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] Fractional‑resample via `torchaudio.functional.resample` (`5dcb51d`)
   - [x] Unit tests on sample delay accuracy (`5dcb51d`)
 - [ ] **Extended Fading Profiles**
-  - [ ] TDL Rayleigh
+  - [x] TDL Rayleigh (`7f76c44`)
   - [ ] Rician K‑factor sweep
   - [ ] Nakagami‑m option
 - [ ] **Interference Simulation**

@@ -1341,3 +1341,70 @@ class DopplerShift(object):
                     for key in self.keys:
                         item[key][idx] = self._resample(item[key][idx])
         return item
+
+
+class TDLRayleigh(object):
+    """Apply a simple time-delay line Rayleigh fading model."""
+
+    def __init__(
+        self,
+        delays: list[float],
+        avg_gains_dB: list[float],
+        sample_rate: float,
+        batch: bool = False,
+        data_keys: bool | list[str] = False,
+    ) -> None:
+        if len(delays) != len(avg_gains_dB):
+            raise ValueError("`delays` and `avg_gains_dB` must be same length")
+        self.delays = torch.tensor(delays, dtype=torch.float32)
+        self.avg_gains_dB = torch.tensor(avg_gains_dB, dtype=torch.float32)
+        self.sample_rate = sample_rate
+        self.batch = batch
+        self.keys = data_keys
+
+    def _generate_impulse(self) -> tuple[torch.Tensor, torch.Tensor]:
+        sample_delays = torch.round(self.delays * self.sample_rate).to(torch.long)
+        max_delay = int(sample_delays.max().item())
+        h_real = torch.zeros(max_delay + 1)
+        h_imag = torch.zeros(max_delay + 1)
+        for d, gain_db in zip(sample_delays, self.avg_gains_dB):
+            power = 10 ** (gain_db / 10)
+            std = (power**0.5) / 2**0.5
+            h_real[d] += torch.randn(1).squeeze() * std
+            h_imag[d] += torch.randn(1).squeeze() * std
+        return h_real, h_imag
+
+    def _apply(
+        self, tensor: torch.Tensor, h_real: torch.Tensor, h_imag: torch.Tensor
+    ) -> torch.Tensor:
+        x_r = tensor[0].unsqueeze(0).unsqueeze(0)
+        x_i = tensor[1].unsqueeze(0).unsqueeze(0)
+        k_r = h_real.flip(0).unsqueeze(0).unsqueeze(0)
+        k_i = h_imag.flip(0).unsqueeze(0).unsqueeze(0)
+        pad = k_r.shape[-1] - 1
+        out_r = torch.nn.functional.conv1d(
+            x_r, k_r, padding=pad
+        ) - torch.nn.functional.conv1d(x_i, k_i, padding=pad)
+        out_i = torch.nn.functional.conv1d(
+            x_i, k_r, padding=pad
+        ) + torch.nn.functional.conv1d(x_r, k_i, padding=pad)
+        out_r = out_r.squeeze(0).squeeze(0)[: tensor.shape[-1]]
+        out_i = out_i.squeeze(0).squeeze(0)[: tensor.shape[-1]]
+        return torch.stack([out_r, out_i], dim=0)
+
+    def __call__(self, item):
+        h_r, h_i = self._generate_impulse()
+        if not self.batch:
+            if not self.keys:
+                item["data"] = self._apply(item["data"], h_r, h_i)
+            else:
+                for key in self.keys:
+                    item[key] = self._apply(item[key], h_r, h_i)
+        else:
+            for idx in range(len(item["metadata"]["dt"])):
+                if not self.keys:
+                    item["data"][idx] = self._apply(item["data"][idx], h_r, h_i)
+                else:
+                    for key in self.keys:
+                        item[key][idx] = self._apply(item[key][idx], h_r, h_i)
+        return item
