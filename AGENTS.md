@@ -62,9 +62,9 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
   - [x] TDL Rayleigh (`7f76c44`)
   - [x] Rician K‑factor sweep (`83b3629`)
   - [x] Nakagami‑m option (`83b3629`)
-- [ ] **Interference Simulation**
-  - [ ] Add co‑channel QPSK interferer mix‑in
-  - [ ] Label jammer SNR for possible auxiliary training
+- [x] **Interference Simulation** (`098684d`)
+  - [x] Add co‑channel QPSK interferer mix‑in (`098684d`)
+  - [x] Label jammer SNR for possible auxiliary training (`098684d`)
 
 ---
 
