@@ -1,6 +1,12 @@
 torch
+numba
+numpy
+matplotlib
+scikit-learn
+scipy
 pytorch-lightning
 jupyter
+torchmetrics
 pre-commit
 black==25.1.0
 ruff==0.4.3
