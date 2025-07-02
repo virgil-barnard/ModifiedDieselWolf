@@ -43,14 +43,13 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 
 ---
 
-## 4. Representation Learning
-- [ ] **Self‑Supervised Pre‑Training (SSL)**
+- [x] **Self‑Supervised Pre‑Training (SSL)** (`c21a776`)
   - [x] Implement MoCo‑v3 queue & momentum encoder (`335881d`)
   - [x] Create `RFAugment` with: random CFO, time cropping, IQ swap (`335881d`)
-  - [x] Pre‑train on synthetic + RadioML 2016/2018 (`a8e39db`) 
-- [ ] **Curriculum over SNR**
-  - [x] Schedule: start at +20 dB, lower by 5 dB every plateau (`a8e39db`) 
-  - [x] Add callback to adjust sampling weights (`a8e39db`) 
+  - [x] Pre‑train on synthetic + RadioML 2016/2018 (`a8e39db`)
+- [x] **Curriculum over SNR** (`c21a776`)
+  - [x] Schedule: start at +20 dB, lower by 5 dB every plateau (`a8e39db`)
+  - [x] Add callback to adjust sampling weights (`a8e39db`)
 
 ---
 
@@ -75,22 +74,22 @@ Welcome!  This checklist tracks every deliverable required to lift DieselWolf fr
 - [x] **Mixed Precision + Gradient Accumulation** (`00a5384`)
   - [x] Enable AMP in Trainer (`00a5384`)
   - [x] Tune `accumulate_grad_batches` for batch‑equivalent training (`00a5384`)
-- [ ] **Checkpoint & Resume**
+- [x] **Checkpoint & Resume** (`c21a776`)
   - [x] Save EMA weights (`ee33620`)
-  - [x] Resume SSL → fine‑tune seamlessly (`a8e39db`) 
+  - [x] Resume SSL → fine‑tune seamlessly (`a8e39db`)
 
 ---
 
 ## 7. Model Compression & Deployment
 - [ ] **Pruning**
-  - [ ] Global magnitude prune to 50 %
+  - [x] Global magnitude prune to 50 % (`c21a776`)
   - [ ] Re‑fine‑tune 3 epochs to regain accuracy
 - [ ] **INT8 Quantisation**
-  - [ ] Export `.onnx` model
-  - [ ] Quantise with ONNX‑Runtime PTQ
+  - [x] Export `.onnx` model (`c21a776`)
+  - [x] Quantise with ONNX‑Runtime PTQ (`c21a776`)
   - [ ] Benchmark on Jetson‑Nano / Raspberry Pi
 - [ ] **Documentation**
-  - [ ] Write “Deploy to SDR” guide with example Python script
+  - [x] Write “Deploy to SDR” guide with example Python script (`c21a776`)
 
 ---
 
