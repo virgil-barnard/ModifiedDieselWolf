@@ -24,7 +24,10 @@ class MobileRaT(nn.Module):
             nn.ReLU(),
         )
         self.transformer = ComplexTransformerEncoder(
-            d_model=d_model, nhead=nhead, num_layers=num_layers
+            d_model=d_model,
+            nhead=nhead,
+            num_layers=num_layers,
+            seq_len=seq_len,
         )
         self.classifier = nn.Linear(2 * d_model * seq_len, num_classes)
 
