@@ -345,6 +345,7 @@ class AWGN(object):  # Noise transform, in dB.
         # self.rng = np.random.default_rng() #this is not used any more
         self.batch = batch
         self.keys = data_keys
+        self.eps = 1e-12
 
     def __call__(self, item):
 
@@ -357,7 +358,7 @@ class AWGN(object):  # Noise transform, in dB.
                 P = (tensor * tensor).sum(-1) / tensor.shape[
                     -1
                 ]  # Actual power in the vector
-                N0 = P / gamma  # Noise Power
+                N0 = P / gamma + self.eps  # Noise Power
                 dist = torch.distributions.normal.Normal(
                     0, np.sqrt(N0 / 2.0)
                 )  # actually two distributions
@@ -371,7 +372,7 @@ class AWGN(object):  # Noise transform, in dB.
                     P = (tensor * tensor).sum(-1) / tensor.shape[
                         -1
                     ]  # Actual power in the vector
-                    N0 = P / gamma  # Noise Power
+                    N0 = P / gamma + self.eps  # Noise Power
                     dist = torch.distributions.normal.Normal(
                         0, np.sqrt(N0 / 2.0)
                     )  # actually two distributions
@@ -388,7 +389,7 @@ class AWGN(object):  # Noise transform, in dB.
                     P = (tensor * tensor).sum(-1) / tensor.shape[
                         -1
                     ]  # Actual power in the vector
-                    N0 = P / gamma  # Noise Power
+                    N0 = P / gamma + self.eps  # Noise Power
                     dist = torch.distributions.normal.Normal(
                         0, np.sqrt(N0 / 2.0)
                     )  # actually two distributions
@@ -402,7 +403,7 @@ class AWGN(object):  # Noise transform, in dB.
                         P = (tensor * tensor).sum(-1) / tensor.shape[
                             -1
                         ]  # Actual power in the vector
-                        N0 = P / gamma  # Noise Power
+                        N0 = P / gamma + self.eps  # Noise Power
                         dist = torch.distributions.normal.Normal(
                             0, np.sqrt(N0 / 2.0)
                         )  # actually two distributions
@@ -419,6 +420,7 @@ class RandomAWGN(object):  # Noise transform, in dB.
         # self.rng = np.random.default_rng() #this is not used any more
         self.batch = batch
         self.keys = data_keys
+        self.eps = 1e-12
 
     def __call__(self, item):
 
@@ -432,7 +434,7 @@ class RandomAWGN(object):  # Noise transform, in dB.
                 P = (tensor * tensor).sum(-1) / tensor.shape[
                     -1
                 ]  # Actual power in the vector
-                N0 = P / gamma  # Noise Power
+                N0 = P / gamma + self.eps  # Noise Power
                 dist = torch.distributions.normal.Normal(
                     0, np.sqrt(N0 / 2.0)
                 )  # actually two distributions
@@ -446,7 +448,7 @@ class RandomAWGN(object):  # Noise transform, in dB.
                     P = (tensor * tensor).sum(-1) / tensor.shape[
                         -1
                     ]  # Actual power in the vector
-                    N0 = P / gamma  # Noise Power
+                    N0 = P / gamma + self.eps  # Noise Power
                     dist = torch.distributions.normal.Normal(
                         0, np.sqrt(N0 / 2.0)
                     )  # actually two distributions
@@ -466,7 +468,7 @@ class RandomAWGN(object):  # Noise transform, in dB.
                     P = (tensor * tensor).sum(-1) / tensor.shape[
                         -1
                     ]  # Actual power in the vector
-                    N0 = P / gamma  # Noise Power
+                    N0 = P / gamma + self.eps  # Noise Power
                     dist = torch.distributions.normal.Normal(
                         0, np.sqrt(N0 / 2.0)
                     )  # actually two distributions
@@ -480,7 +482,7 @@ class RandomAWGN(object):  # Noise transform, in dB.
                         P = (tensor * tensor).sum(-1) / tensor.shape[
                             -1
                         ]  # Actual power in the vector
-                        N0 = P / gamma  # Noise Power
+                        N0 = P / gamma + self.eps  # Noise Power
                         dist = torch.distributions.normal.Normal(
                             0, np.sqrt(N0 / 2.0)
                         )  # actually two distributions
