@@ -1,24 +1,11 @@
 import subprocess
 import torch
-from dieselwolf.models import AMRClassifier
-
-
-class SimpleCNN(torch.nn.Module):
-    def __init__(self, num_samples: int, num_classes: int) -> None:
-        super().__init__()
-        self.net = torch.nn.Sequential(
-            torch.nn.Conv1d(2, 32, kernel_size=3, padding=1),
-            torch.nn.Flatten(),
-            torch.nn.Linear(32 * num_samples, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
-        return self.net(x)
+from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
 
 def test_finetune_script(tmp_path):
     ckpt = tmp_path / "pruned.ckpt"
-    model = AMRClassifier(SimpleCNN(16, 4), num_classes=4)
+    model = AMRClassifier(ConfigurableCNN(16, 4), num_classes=4)
     torch.save({"state_dict": model.state_dict()}, ckpt)
     out_ckpt = tmp_path / "finetuned.ckpt"
     subprocess.check_call(
@@ -37,6 +24,8 @@ def test_finetune_script(tmp_path):
             "16",
             "--batch-size",
             "2",
+            "--num-classes",
+            "4",
         ]
     )
     assert out_ckpt.exists()

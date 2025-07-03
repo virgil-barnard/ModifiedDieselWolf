@@ -2,21 +2,7 @@ import argparse
 
 import torch
 
-from dieselwolf.models import AMRClassifier
-
-
-class SimpleCNN(torch.nn.Module):
-    def __init__(self, num_samples: int, num_classes: int) -> None:
-        super().__init__()
-        self.net = torch.nn.Sequential(
-            torch.nn.Conv1d(2, 32, kernel_size=3, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.Flatten(),
-            torch.nn.Linear(32 * num_samples, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
-        return self.net(x)
+from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
 
 def parse_args() -> argparse.Namespace:
@@ -31,7 +17,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     model = AMRClassifier(
-        SimpleCNN(args.num_samples, args.num_classes), args.num_classes
+        ConfigurableCNN(args.num_samples, args.num_classes), args.num_classes
     )
     ckpt = torch.load(args.checkpoint, map_location="cpu")
     state = ckpt.get("state_dict", ckpt)

@@ -1,11 +1,11 @@
 import torch
 
-from dieselwolf.models import AMRClassifier
-from scripts.prune import apply_global_pruning, SimpleCNN
+from dieselwolf.models import AMRClassifier, ConfigurableCNN
+from scripts.prune import apply_global_pruning
 
 
 def test_global_pruning_reduces_params():
-    model = AMRClassifier(SimpleCNN(16, 4), num_classes=4)
+    model = AMRClassifier(ConfigurableCNN(16, 4), num_classes=4)
     total = 0
     for p in model.parameters():
         total += p.numel()

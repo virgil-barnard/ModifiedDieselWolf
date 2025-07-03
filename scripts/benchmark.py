@@ -9,23 +9,7 @@ from torch.utils.data import DataLoader
 
 from dieselwolf.data import DigitalModulationDataset
 from dieselwolf.metrics import accuracy_per_snr, confusion_at_0db, measure_latency
-from dieselwolf.models import AMRClassifier
-
-
-class SimpleCNN(nn.Module):
-    """Very small CNN used for quick benchmarks."""
-
-    def __init__(self, num_samples: int, num_classes: int) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv1d(2, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(32 * num_samples, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,7 +54,7 @@ def main() -> None:
     loader = DataLoader(ds, batch_size=args.batch_size)
 
     model = AMRClassifier(
-        SimpleCNN(args.num_samples, len(ds.classes)), num_classes=len(ds.classes)
+        ConfigurableCNN(args.num_samples, len(ds.classes)), num_classes=len(ds.classes)
     )
     if args.checkpoint:
         ckpt = torch.load(args.checkpoint, map_location="cpu")

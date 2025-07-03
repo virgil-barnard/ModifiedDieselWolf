@@ -1,27 +1,14 @@
 import pytest
 import subprocess
 import torch
-from dieselwolf.models import AMRClassifier
+from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
 pytest.importorskip("onnx")
 
 
-class SimpleCNN(torch.nn.Module):
-    def __init__(self, num_samples: int, num_classes: int) -> None:
-        super().__init__()
-        self.net = torch.nn.Sequential(
-            torch.nn.Conv1d(2, 32, kernel_size=3, padding=1),
-            torch.nn.Flatten(),
-            torch.nn.Linear(32 * num_samples, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
-        return self.net(x)
-
-
 def test_benchmark_onnx(tmp_path):
     ckpt = tmp_path / "model.ckpt"
-    model = AMRClassifier(SimpleCNN(16, 4), num_classes=4)
+    model = AMRClassifier(ConfigurableCNN(16, 4), num_classes=4)
     torch.save({"state_dict": model.state_dict()}, ckpt)
     onnx_path = tmp_path / "model.onnx"
     quant_path = tmp_path / "model_int8.onnx"
