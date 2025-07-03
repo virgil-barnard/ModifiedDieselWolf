@@ -1,7 +1,26 @@
+import math
 import torch
 from torch import nn
 
 from ..complex_layers import ComplexLinear, ComplexBatchNorm1d
+
+
+class SinusoidalPositionalEncoding(nn.Module):
+    """Sinusoidal position embeddings for complex inputs."""
+
+    def __init__(self, embed_dim: int, max_len: int) -> None:
+        super().__init__()
+        pe = torch.zeros(max_len, embed_dim)
+        position = torch.arange(0, max_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, embed_dim, 2) * (-math.log(10000.0) / embed_dim)
+        )
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        self.register_buffer("pe", pe.permute(1, 0).unsqueeze(0))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x + self.pe[:, :, : x.size(2)]
 
 
 class ComplexTransformerEncoderLayer(nn.Module):
@@ -56,13 +75,20 @@ class ComplexTransformerEncoder(nn.Module):
         num_layers: int,
         dim_feedforward: int = 2048,
         dropout: float = 0.1,
+        seq_len: int | None = None,
     ) -> None:
         super().__init__()
         layer = ComplexTransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
         self.layers = nn.ModuleList([layer for _ in range(num_layers)])
+        if seq_len is not None:
+            self.pos_enc = SinusoidalPositionalEncoding(d_model * 2, seq_len)
+        else:
+            self.pos_enc = None
 
     def forward(self, src: torch.Tensor) -> torch.Tensor:
         out = src
+        if self.pos_enc is not None:
+            out = self.pos_enc(out)
         for layer in self.layers:
             out = layer(out)
         return out

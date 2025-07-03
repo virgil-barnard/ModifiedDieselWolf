@@ -25,10 +25,13 @@ class NMformer(nn.Module):
             ComplexBatchNorm1d(d_model),
             nn.ReLU(),
         )
-        self.transformer = ComplexTransformerEncoder(
-            d_model=d_model, nhead=nhead, num_layers=num_layers
-        )
         total_len = seq_len + num_noise_tokens
+        self.transformer = ComplexTransformerEncoder(
+            d_model=d_model,
+            nhead=nhead,
+            num_layers=num_layers,
+            seq_len=total_len,
+        )
         self.classifier = nn.Linear(2 * d_model * total_len, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

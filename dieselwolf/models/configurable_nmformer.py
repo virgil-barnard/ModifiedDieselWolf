@@ -58,6 +58,7 @@ class ConfigurableNMformer(nn.Module):
             d_model=in_ch,
             nhead=nhead,
             num_layers=num_layers,
+            seq_len=total_len,
         )
         self.classifier = nn.Linear(2 * in_ch * total_len, num_classes)
 
