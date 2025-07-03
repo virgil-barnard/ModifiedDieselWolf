@@ -15,7 +15,7 @@ class ConfigurableMobileRaT(nn.Module):
         num_classes: int,
         conv_channels: Sequence[int] | int = 32,
         kernel_sizes: Sequence[int] | int = 3,
-        batch_norm: bool = True,
+        batch_norm: bool = False,
         activation: str = "relu",
         dropout: float = 0.0,
         nhead: int = 4,
