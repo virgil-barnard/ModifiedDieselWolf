@@ -14,7 +14,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from dieselwolf.data import DigitalModulationDataset
-from dieselwolf.models import AMRClassifier
+from dieselwolf.models import AMRClassifier, build_backbone
 
 
 class SimpleCNN(nn.Module):
@@ -70,6 +70,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Path to MoCo checkpoint for fine-tuning",
     )
+    parser.add_argument(
+        "--model-config",
+        type=str,
+        default=None,
+        help="Path to YAML file specifying the backbone configuration",
+    )
     return parser.parse_args()
 
 
@@ -92,7 +98,10 @@ def main() -> None:
     )
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
-    backbone = SimpleCNN(args.num_samples, len(train_ds.classes))
+    if args.model_config:
+        backbone = build_backbone(args.model_config)
+    else:
+        backbone = SimpleCNN(args.num_samples, len(train_ds.classes))
     model = AMRClassifier(
         backbone,
         num_classes=len(train_ds.classes),

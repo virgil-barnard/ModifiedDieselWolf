@@ -9,7 +9,7 @@ from dieselwolf.data import (
     RadioML2018Dataset,
     RFAugment,
 )
-from dieselwolf.models import MobileRaT, MoCoV3
+from dieselwolf.models import MoCoV3, build_backbone
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,6 +27,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--radio2018", type=str, default=None, help="Path to RadioML2018 dataset"
+    )
+    parser.add_argument(
+        "--model-config",
+        type=str,
+        default=None,
+        help="YAML file specifying the backbone for the encoder",
     )
     return parser.parse_args()
 
@@ -49,7 +55,10 @@ def main() -> None:
     train_ds = ConcatDataset(datasets)
     loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
 
-    backbone = MobileRaT()
+    if args.model_config:
+        backbone = build_backbone(args.model_config)
+    else:
+        backbone = build_backbone("configs/mobile_rat.yaml")
     model = MoCoV3(
         encoder=backbone,
         feature_dim=args.feature_dim,
