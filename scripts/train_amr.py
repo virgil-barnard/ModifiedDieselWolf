@@ -1,7 +1,6 @@
 import argparse
 
 import pytorch_lightning as pl
-import torch
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
@@ -10,25 +9,10 @@ from pytorch_lightning.callbacks import (
 
 from dieselwolf.callbacks import SNRCurriculumCallback
 from dieselwolf.data.TransformsRF import AWGN
-from torch import nn
 from torch.utils.data import DataLoader
 
 from dieselwolf.data import DigitalModulationDataset
-from dieselwolf.models import AMRClassifier, build_backbone
-
-
-class SimpleCNN(nn.Module):
-    def __init__(self, num_samples: int, num_classes: int) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv1d(2, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(32 * num_samples, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+from dieselwolf.models import AMRClassifier, ConfigurableCNN, build_backbone
 
 
 def parse_args() -> argparse.Namespace:
@@ -76,6 +60,35 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Path to YAML file specifying the backbone configuration",
     )
+    parser.add_argument(
+        "--cnn-channels",
+        type=str,
+        default="32",
+        help="Comma-separated channels for configurable CNN",
+    )
+    parser.add_argument(
+        "--kernel-sizes",
+        type=str,
+        default="3",
+        help="Comma-separated kernel sizes",
+    )
+    parser.add_argument(
+        "--batch-norm",
+        action="store_true",
+        help="Enable batch normalization",
+    )
+    parser.add_argument(
+        "--activation",
+        type=str,
+        default="relu",
+        help="Activation function",
+    )
+    parser.add_argument(
+        "--dropout",
+        type=float,
+        default=0.0,
+        help="Dropout probability between conv layers",
+    )
     return parser.parse_args()
 
 
@@ -101,7 +114,17 @@ def main() -> None:
     if args.model_config:
         backbone = build_backbone(args.model_config)
     else:
-        backbone = SimpleCNN(args.num_samples, len(train_ds.classes))
+        channels = [int(c) for c in args.cnn_channels.split(",")]
+        kernels = [int(k) for k in args.kernel_sizes.split(",")]
+        backbone = ConfigurableCNN(
+            seq_len=args.num_samples,
+            num_classes=len(train_ds.classes),
+            conv_channels=channels,
+            kernel_sizes=kernels,
+            batch_norm=args.batch_norm,
+            activation=args.activation,
+            dropout=args.dropout,
+        )
     model = AMRClassifier(
         backbone,
         num_classes=len(train_ds.classes),
