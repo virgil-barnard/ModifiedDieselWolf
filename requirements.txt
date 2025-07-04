@@ -10,3 +10,5 @@ transformers
 pytorch-lightning
 torchmetrics
 onnxruntime==1.22.0
+ray[tune]
+tensorboard
