@@ -12,3 +12,5 @@ black==25.1.0
 ruff==0.4.3
 pytest
 onnxruntime==1.22.0
+ray[tune]
+tensorboard
