@@ -1,5 +1,3 @@
-import argparse
-
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
@@ -54,11 +52,11 @@ def train_cnn(config: dict) -> None:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Tune ConfigurableCNN with Ray Tune")
-    p.add_argument("--epochs", type=int, default=1)
-    p.add_argument("--num-examples", type=int, default=16)
+    p.add_argument("--epochs", type=int, default=20)
+    p.add_argument("--num-examples", type=int, default=2**12)
     p.add_argument("--num-samples", type=int, default=512)
-    p.add_argument("--max-trials", type=int, default=1)
-    p.add_argument("--log-dir", type=str, default="ray_results")
+    p.add_argument("--max-trials", type=int, default=20)
+    p.add_argument("--log-dir", type=str, default="/app/ray_results")
     return p.parse_args()
 
 
@@ -80,7 +78,7 @@ def main() -> None:
 
     tune.run(
         train_cnn,
-        resources_per_trial={"cpu": 1, "gpu": 0},
+        resources_per_trial={"cpu": 1, "gpu": 1},
         config=config,
         num_samples=args.max_trials,
         storage_path=args.log_dir,
