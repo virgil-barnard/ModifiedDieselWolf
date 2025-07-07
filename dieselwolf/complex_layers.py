@@ -60,3 +60,18 @@ class ComplexLinear(nn.Module):
     def reset_parameters(self) -> None:
         self.real.reset_parameters()
         self.imag.reset_parameters()
+
+
+class ComplexLayerNorm(nn.Module):
+    """LayerNorm for complex inputs applied separately to real and imaginary parts."""
+
+    def __init__(self, normalized_shape: int) -> None:
+        super().__init__()
+        self.real = nn.LayerNorm(normalized_shape)
+        self.imag = nn.LayerNorm(normalized_shape)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x_r, x_i = x.chunk(2, dim=1)
+        real = self.real(x_r.permute(0, 2, 1)).permute(0, 2, 1)
+        imag = self.imag(x_i.permute(0, 2, 1)).permute(0, 2, 1)
+        return torch.cat([real, imag], dim=1)
