@@ -6,13 +6,13 @@ from typing import Any, Mapping, MutableMapping, Union
 import yaml
 from torch import nn
 
-from .mobile_rat import MobileRaT
-from .nmformer import NMformer
+from .configurable_cnn import ConfigurableCNN
+from .configurable_mobile_rat import ConfigurableMobileRaT
 
 
 _BACKBONES = {
-    "MobileRaT": MobileRaT,
-    "NMformer": NMformer,
+    "ConfigurableMobileRaT": ConfigurableMobileRaT,
+    "ConfigurableCNN": ConfigurableCNN,
 }
 
 
