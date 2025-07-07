@@ -26,7 +26,7 @@ Additional tutorial notebooks can be found in the `notebooks/` directory:
 
 ```bash
 docker build -t dieselmod .
-docker run --gpus all -it --rm -p 8888:8888 -v ${pwd}:/app dieselmod
+docker run --gpus all -it --rm -p 8888:8888 -p 6006:6006 -v ${pwd}:/app dieselmod
 ```
 
 To run scripts from top level directory:
