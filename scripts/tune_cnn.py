@@ -4,6 +4,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 from torch.utils.data import DataLoader
+import torch
 
 from dieselwolf.data import DigitalModulationDataset
 from dieselwolf.data.TransformsRF import AWGN
@@ -58,15 +59,37 @@ def train_cnn(config: dict) -> None:
     trainer.fit(model, train_loader, val_loader)
 
 
+def _float_or_inf(value: str) -> float:
+    """Parse a float value that may be 'inf'."""
+
+    if value == "inf":
+        return float("inf")
+    return float(value)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Tune ConfigurableCNN with Ray Tune")
     p.add_argument("--epochs", type=int, default=20)
     p.add_argument("--num-examples", type=int, default=2**12)
     p.add_argument("--num-samples", type=int, default=512)
     p.add_argument("--max-trials", type=int, default=20)
-    p.add_argument("--adv-eps", type=float, default=0.0)
-    p.add_argument("--adv-weight", type=float, default=0.5)
-    p.add_argument("--adv-norm", type=float, default=float("inf"))
+    p.add_argument(
+        "--adv-eps", type=float, nargs="+", default=[0.0], help="Adversarial eps values"
+    )
+    p.add_argument(
+        "--adv-weight",
+        type=float,
+        nargs="+",
+        default=[0.5],
+        help="Adversarial loss weight values",
+    )
+    p.add_argument(
+        "--adv-norm",
+        type=_float_or_inf,
+        nargs="+",
+        default=[float("inf")],
+        help="Gradient norm types to try",
+    )
     p.add_argument("--log-dir", type=str, default="/app/ray_results")
     return p.parse_args()
 
@@ -84,15 +107,15 @@ def main() -> None:
         "kernel1": tune.choice([3, 5]),
         "kernel2": tune.choice([3, 5]),
         "dropout": tune.uniform(0.0, 0.5),
-        "adv_eps": args.adv_eps,
-        "adv_weight": args.adv_weight,
-        "adv_norm": args.adv_norm,
+        "adv_eps": tune.choice(args.adv_eps),
+        "adv_weight": tune.choice(args.adv_weight),
+        "adv_norm": tune.choice(args.adv_norm),
         "log_dir": args.log_dir,
     }
 
     tune.run(
         train_cnn,
-        resources_per_trial={"cpu": 1, "gpu": 1},
+        resources_per_trial={"cpu": 1, "gpu": 1 if torch.cuda.is_available() else 0},
         config=config,
         num_samples=args.max_trials,
         storage_path=args.log_dir,
