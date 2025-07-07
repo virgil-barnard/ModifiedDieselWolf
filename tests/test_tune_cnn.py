@@ -14,6 +14,12 @@ def test_tune_cnn_script(tmp_path):
             "16",
             "--max-trials",
             "1",
+            "--adv-eps",
+            "0.0",
+            "--adv-weight",
+            "0.5",
+            "--adv-norm",
+            "inf",
             "--log-dir",
             str(tmp_path),
         ]

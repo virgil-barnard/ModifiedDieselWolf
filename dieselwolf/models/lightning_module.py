@@ -25,6 +25,9 @@ class AMRClassifier(pl.LightningModule):
         predict_channel: bool = False,
         snr_weight: float = 1.0,
         channel_weight: float = 1.0,
+        adv_eps: float = 0.0,
+        adv_weight: float = 0.5,
+        adv_norm: float = float("inf"),
     ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["backbone"])
@@ -57,7 +60,8 @@ class AMRClassifier(pl.LightningModule):
 
     def training_step(self, batch, batch_idx: int) -> torch.Tensor:
         y = batch["label"]
-        out = self.forward(batch["data"])
+        x = batch["data"]
+        out = self.forward(x)
         logits = out[0] if isinstance(out, tuple) else out
         snr_pred = None
         channel_pred = None
@@ -94,6 +98,26 @@ class AMRClassifier(pl.LightningModule):
             chan_loss = self.regression_loss(channel_pred, target)
             loss = loss + self.hparams.channel_weight * chan_loss
             self.log("train_channel_loss", chan_loss)
+        if self.hparams.adv_eps > 0:
+            x_adv = x.detach().clone().requires_grad_(True)
+            adv_logits = self.backbone(x_adv)
+            adv_loss = self.criterion(adv_logits, y)
+            grad = torch.autograd.grad(adv_loss, x_adv)[0]
+            if self.hparams.adv_norm == float("inf"):
+                delta = self.hparams.adv_eps * grad.sign()
+            else:
+                g_norm = grad.view(grad.size(0), -1).norm(
+                    p=self.hparams.adv_norm, dim=1
+                )
+                g_norm = g_norm.view(-1, 1, 1)
+                delta = self.hparams.adv_eps * grad / (g_norm + 1e-8)
+            adv_data = x + delta.detach()
+            adv_logits = self.backbone(adv_data)
+            adv_loss = self.criterion(adv_logits, y)
+            loss = (
+                1 - self.hparams.adv_weight
+            ) * loss + self.hparams.adv_weight * adv_loss
+
         self.train_acc(logits, y)
         self.log("train_loss", loss)
         self.log("train_acc", self.train_acc, prog_bar=True)

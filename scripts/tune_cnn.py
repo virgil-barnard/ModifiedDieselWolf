@@ -1,3 +1,4 @@
+import argparse
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
@@ -32,7 +33,14 @@ def train_cnn(config: dict) -> None:
         kernel_sizes=[config["kernel1"], config["kernel2"]],
         dropout=config["dropout"],
     )
-    model = AMRClassifier(backbone, num_classes=len(train_ds.classes), lr=config["lr"])
+    model = AMRClassifier(
+        backbone,
+        num_classes=len(train_ds.classes),
+        lr=config["lr"],
+        adv_eps=config["adv_eps"],
+        adv_weight=config["adv_weight"],
+        adv_norm=config["adv_norm"],
+    )
 
     logger = TensorBoardLogger(save_dir=config["log_dir"], name="")
     trainer = pl.Trainer(
@@ -56,6 +64,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--num-examples", type=int, default=2**12)
     p.add_argument("--num-samples", type=int, default=512)
     p.add_argument("--max-trials", type=int, default=20)
+    p.add_argument("--adv-eps", type=float, default=0.0)
+    p.add_argument("--adv-weight", type=float, default=0.5)
+    p.add_argument("--adv-norm", type=float, default=float("inf"))
     p.add_argument("--log-dir", type=str, default="/app/ray_results")
     return p.parse_args()
 
@@ -73,6 +84,9 @@ def main() -> None:
         "kernel1": tune.choice([3, 5]),
         "kernel2": tune.choice([3, 5]),
         "dropout": tune.uniform(0.0, 0.5),
+        "adv_eps": args.adv_eps,
+        "adv_weight": args.adv_weight,
+        "adv_norm": args.adv_norm,
         "log_dir": args.log_dir,
     }
 
