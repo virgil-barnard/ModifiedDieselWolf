@@ -52,3 +52,13 @@ def test_amrclassifier_training_step_channel():
     }
     loss = model.training_step(batch, 0)
     assert loss.item() > 0
+
+
+def test_amrclassifier_training_step_adversarial():
+    model = AMRClassifier(DummyNet(num_classes=3), num_classes=3, adv_eps=0.1)
+    batch = {
+        "data": torch.randn(2, 2, 2),
+        "label": torch.tensor([0, 1]),
+    }
+    loss = model.training_step(batch, 0)
+    assert loss.item() > 0
