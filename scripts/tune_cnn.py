@@ -74,20 +74,20 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--num-samples", type=int, default=512)
     p.add_argument("--max-trials", type=int, default=20)
     p.add_argument(
-        "--adv-eps", type=float, nargs="+", default=[0.0], help="Adversarial eps values"
+        "--adv-eps", type=float, nargs="+", default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5], help="Adversarial eps values"
     )
     p.add_argument(
         "--adv-weight",
         type=float,
         nargs="+",
-        default=[0.5],
+        default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
         help="Adversarial loss weight values",
     )
     p.add_argument(
         "--adv-norm",
         type=_float_or_inf,
         nargs="+",
-        default=[float("inf")],
+        default=[float("inf"), float(1), float(2)],
         help="Gradient norm types to try",
     )
     p.add_argument("--log-dir", type=str, default="/app/ray_results")
