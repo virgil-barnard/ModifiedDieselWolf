@@ -2,7 +2,7 @@ import math
 import torch
 from torch import nn
 
-from ..complex_layers import ComplexLinear, ComplexBatchNorm1d
+from ..complex_layers import ComplexLinear, ComplexLayerNorm
 
 
 class SinusoidalPositionalEncoding(nn.Module):
@@ -39,8 +39,8 @@ class ComplexTransformerEncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = ComplexLinear(dim_feedforward, d_model)
 
-        self.norm1 = ComplexBatchNorm1d(d_model)
-        self.norm2 = ComplexBatchNorm1d(d_model)
+        self.norm1 = ComplexLayerNorm(d_model)
+        self.norm2 = ComplexLayerNorm(d_model)
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         self.activation = nn.ReLU()

@@ -1,5 +1,10 @@
 import torch
-from dieselwolf.complex_layers import ComplexConv1d, ComplexBatchNorm1d, ComplexLinear
+from dieselwolf.complex_layers import (
+    ComplexConv1d,
+    ComplexBatchNorm1d,
+    ComplexLinear,
+    ComplexLayerNorm,
+)
 
 
 class DummyModel(torch.nn.Module):
@@ -35,3 +40,10 @@ def test_weight_initialisation():
     layer = ComplexLinear(8, 4)
     for param in layer.parameters():
         assert param.abs().sum() > 0
+
+
+def test_layernorm_shape():
+    norm = ComplexLayerNorm(4)
+    x = torch.randn(2, 8, 16)
+    out = norm(x)
+    assert out.shape == x.shape
