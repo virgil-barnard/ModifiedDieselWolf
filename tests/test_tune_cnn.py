@@ -16,10 +16,13 @@ def test_tune_cnn_script(tmp_path):
             "1",
             "--adv-eps",
             "0.0",
+            "0.1",
             "--adv-weight",
             "0.5",
+            "0.8",
             "--adv-norm",
             "inf",
+            "2",
             "--log-dir",
             str(tmp_path),
         ]
