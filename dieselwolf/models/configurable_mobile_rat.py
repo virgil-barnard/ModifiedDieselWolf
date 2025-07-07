@@ -56,10 +56,15 @@ class ConfigurableMobileRaT(nn.Module):
             num_layers=num_layers,
             seq_len=seq_len,
         )
-        self.classifier = nn.Linear(2 * in_ch * seq_len, num_classes)
+
+        self.classifier = nn.Linear(2*in_ch, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        I, Q = x.chunk(2, dim=1)
+        mag  = torch.sqrt(I**2 + Q**2 + 1e-8)
+        phs  = torch.atan2(Q, I)
+        x    = torch.cat([mag, phs], dim=1)
         x = self.frontend(x)
         x = self.transformer(x)
-        x = x.flatten(1)
+        x = x.mean(dim=2) 
         return self.classifier(x)
