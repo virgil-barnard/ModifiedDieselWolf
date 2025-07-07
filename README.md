@@ -24,5 +24,12 @@ Additional tutorial notebooks can be found in the `notebooks/` directory:
     Training_Tutorial: Example of training with PyTorch Lightning.
     Evaluation_Tutorial: Demonstrates metrics and benchmark utilities.
 
+```bash
 docker build -t dieselmod .
 docker run --gpus all -it --rm -p 8888:8888 -v ${pwd}:/app dieselmod
+```
+
+To run scripts from top level directory:
+```bash 
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+```
