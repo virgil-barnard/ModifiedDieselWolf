@@ -1,6 +1,7 @@
 import argparse
 
 import torch
+import importlib
 
 from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
@@ -16,6 +17,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if importlib.util.find_spec("onnx") is None:
+        print("onnx package not installed, skipping export.")
+        return
     model = AMRClassifier(
         ConfigurableCNN(args.num_samples, args.num_classes), args.num_classes
     )

@@ -177,6 +177,7 @@ class LatentSpaceCallback(pl.Callback):
         self.best_loss = float("inf")
         self.best_epoch = -1
         self.class_names = getattr(dataloader.dataset, "classes", None)
+        self.best_model_path: str | None = None
 
     def _extract_features(
         self, pl_module: pl.LightningModule, x: torch.Tensor
@@ -240,33 +241,49 @@ class LatentSpaceCallback(pl.Callback):
         if loss + 1e-6 < self.best_loss:
             self.best_loss = loss
             self.best_epoch = trainer.current_epoch
-            records = self._project(pl_module)
-            if self.output_dir:
-                path = os.path.join(self.output_dir, f"epoch_{self.best_epoch}.pt")
-                torch.save({"epoch": self.best_epoch, "records": records}, path)
-            if trainer.logger and hasattr(trainer.logger, "experiment"):
-                embeddings = torch.stack([r["embedding"] for r in records])
-                rows = []
-                for r in records:
-                    label_name = r.get("class_name")
-                    if label_name is None:
-                        idx = int(r["label"].item())
-                        if self.class_names is not None and 0 <= idx < len(
-                            self.class_names
-                        ):
-                            label_name = str(self.class_names[idx])
-                        else:
-                            label_name = str(idx)
-                    snr = None
-                    if isinstance(r.get("metadata"), dict):
-                        snr = r["metadata"].get("SNRdB")
-                        if isinstance(snr, torch.Tensor):
-                            snr = snr.item()
-                    rows.append([label_name, snr])
-                trainer.logger.experiment.add_embedding(
-                    embeddings,
-                    metadata=rows,
-                    metadata_header=["class", "SNRdB"],
-                    global_step=self.best_epoch,
-                    tag=self.log_tag,
-                )
+        checkpoint_cb = getattr(trainer, "checkpoint_callback", None)
+        if checkpoint_cb is not None:
+            self.best_model_path = checkpoint_cb.best_model_path
+
+    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+        """Generate latent space projection from the best model after training."""
+        checkpoint_cb = getattr(trainer, "checkpoint_callback", None)
+        ckpt_path = self.best_model_path
+        if checkpoint_cb is not None:
+            ckpt_path = checkpoint_cb.best_model_path or ckpt_path
+        if ckpt_path and os.path.isfile(ckpt_path):
+            state = torch.load(ckpt_path, map_location=pl_module.device)
+            if "state_dict" in state:
+                pl_module.load_state_dict(state["state_dict"])
+            else:
+                pl_module.load_state_dict(state)
+        records = self._project(pl_module)
+        if self.output_dir:
+            path = os.path.join(self.output_dir, f"epoch_{self.best_epoch}.pt")
+            torch.save({"epoch": self.best_epoch, "records": records}, path)
+        if trainer.logger and hasattr(trainer.logger, "experiment"):
+            embeddings = torch.stack([r["embedding"] for r in records])
+            rows = []
+            for r in records:
+                label_name = r.get("class_name")
+                if label_name is None:
+                    idx = int(r["label"].item())
+                    if self.class_names is not None and 0 <= idx < len(
+                        self.class_names
+                    ):
+                        label_name = str(self.class_names[idx])
+                    else:
+                        label_name = str(idx)
+                snr = None
+                if isinstance(r.get("metadata"), dict):
+                    snr = r["metadata"].get("SNRdB")
+                    if isinstance(snr, torch.Tensor):
+                        snr = snr.item()
+                rows.append([label_name, snr])
+            trainer.logger.experiment.add_embedding(
+                embeddings,
+                metadata=rows,
+                metadata_header=["class", "SNRdB"],
+                global_step=self.best_epoch,
+                tag=self.log_tag,
+            )

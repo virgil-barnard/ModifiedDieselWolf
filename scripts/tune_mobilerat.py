@@ -67,6 +67,7 @@ def train_mobile_rat(config: dict) -> None:
         output_dir=os.path.join(logger.log_dir, "latent_space"),
         log_tag="val_latent",
     )
+    ckpt_cb = pl.callbacks.ModelCheckpoint(save_top_k=1, monitor="val_loss")
     trainer = pl.Trainer(
         max_epochs=config["epochs"],
         logger=logger,
@@ -77,6 +78,7 @@ def train_mobile_rat(config: dict) -> None:
             ),
             cm_callback,
             latent_cb,
+            ckpt_cb,
             EarlyStopping(monitor="val_loss", mode="min", patience=5),
         ],
         accelerator="auto",

@@ -1,6 +1,5 @@
 import argparse
-
-from onnxruntime.quantization import QuantType, quantize_dynamic
+import importlib.util
 
 
 def parse_args() -> argparse.Namespace:
@@ -18,6 +17,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if importlib.util.find_spec("onnx") is None:
+        print("onnx package not installed, skipping quantization.")
+        return
+    from onnxruntime.quantization import QuantType, quantize_dynamic
+
     op_types = [op.strip() for op in args.op_types.split(",") if op.strip()]
     quantize_dynamic(
         args.input,
