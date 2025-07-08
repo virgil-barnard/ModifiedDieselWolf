@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 
 import numpy as np
@@ -16,6 +17,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if not os.path.exists(args.model):
+        print("Model file not found, skipping benchmark.")
+        return
     session = ort.InferenceSession(args.model)
     dummy = np.random.randn(1, 2, args.input_size).astype(np.float32)
     for _ in range(args.num_warmup):
