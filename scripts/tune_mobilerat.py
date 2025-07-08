@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -6,7 +7,7 @@ from pytorch_lightning.callbacks import EarlyStopping
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 from ray.tune.search.bayesopt import BayesOptSearch
-from dieselwolf.callbacks import ConfusionMatrixCallback
+from dieselwolf.callbacks import ConfusionMatrixCallback, LatentSpaceCallback
 from torch.utils.data import DataLoader
 import torch
 
@@ -61,6 +62,11 @@ def train_mobile_rat(config: dict) -> None:
     )
 
     logger = TensorBoardLogger(save_dir=config["log_dir"], name="")
+    latent_cb = LatentSpaceCallback(
+        val_loader,
+        output_dir=os.path.join(logger.log_dir, "latent_space"),
+        log_tag="val_latent",
+    )
     trainer = pl.Trainer(
         max_epochs=config["epochs"],
         logger=logger,
@@ -70,6 +76,7 @@ def train_mobile_rat(config: dict) -> None:
                 {"val_loss": "val_loss", "val_acc": "val_acc"}, on="validation_end"
             ),
             cm_callback,
+            latent_cb,
             EarlyStopping(monitor="val_loss", mode="min", patience=5),
         ],
         accelerator="auto",

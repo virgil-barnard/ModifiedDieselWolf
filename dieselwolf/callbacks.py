@@ -158,3 +158,93 @@ class ConfusionMatrixCallback(pl.Callback):
                 self.log_tag, fig, global_step=trainer.current_epoch
             )
         plt.close(fig)
+
+
+# Callback to store latent space projections
+
+
+class LatentSpaceCallback(pl.Callback):
+    """Save latent space projections when validation loss improves."""
+
+    def __init__(
+        self, dataloader, output_dir: str | None = None, log_tag: str = "latent_space"
+    ) -> None:
+        self.dataloader = dataloader
+        self.output_dir = output_dir
+        self.log_tag = log_tag
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+        self.best_loss = float("inf")
+        self.best_epoch = -1
+
+    def _extract_features(
+        self, pl_module: pl.LightningModule, x: torch.Tensor
+    ) -> torch.Tensor:
+        backbone = pl_module.backbone
+        if hasattr(backbone, "conv") and hasattr(backbone, "classifier"):
+            feats = backbone.conv(x)
+            feats = feats.flatten(1)
+        elif hasattr(backbone, "frontend") and hasattr(backbone, "transformer"):
+            feats = backbone.frontend(x)
+            feats = backbone.transformer(feats)
+            feats = feats.mean(dim=2)
+        else:
+            feats = backbone(x)
+            if isinstance(feats, torch.Tensor) and feats.ndim > 2:
+                feats = feats.flatten(1)
+        return feats
+
+    def _project(self, pl_module: pl.LightningModule) -> list[dict]:
+        pl_module.eval()
+        device = pl_module.device
+        records = []
+        with torch.no_grad():
+            for batch in self.dataloader:
+                x = batch["data"].to(device)
+                feats = self._extract_features(pl_module, x)
+                out = pl_module(x)
+                logits = out[0] if isinstance(out, tuple) else out
+                preds = logits.argmax(dim=1)
+                for i in range(x.size(0)):
+                    rec = {
+                        "embedding": feats[i].cpu(),
+                        "pred": preds[i].cpu(),
+                        "label": batch["label"][i].cpu(),
+                        "metadata": {},
+                    }
+                    meta = batch.get("metadata")
+                    if meta:
+                        rec["metadata"] = {
+                            k: (v[i].cpu() if isinstance(v, torch.Tensor) else v)
+                            for k, v in meta.items()
+                        }
+                    for k, v in batch.items():
+                        if k in {"data", "label", "metadata"}:
+                            continue
+                        rec[k] = v[i].cpu() if isinstance(v, torch.Tensor) else v
+                    records.append(rec)
+        return records
+
+    def on_validation_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        val_loss = trainer.callback_metrics.get("val_loss")
+        if val_loss is None:
+            return
+        loss = val_loss.item() if hasattr(val_loss, "item") else float(val_loss)
+        if loss + 1e-6 < self.best_loss:
+            self.best_loss = loss
+            self.best_epoch = trainer.current_epoch
+            records = self._project(pl_module)
+            if self.output_dir:
+                path = os.path.join(self.output_dir, f"epoch_{self.best_epoch}.pt")
+                torch.save({"epoch": self.best_epoch, "records": records}, path)
+            if trainer.logger and hasattr(trainer.logger, "experiment"):
+                embeddings = torch.stack([r["embedding"] for r in records])
+                metadata = [str(r["label"].item()) for r in records]
+                trainer.logger.experiment.add_embedding(
+                    embeddings,
+                    metadata=metadata,
+                    global_step=self.best_epoch,
+                    tag=self.log_tag,
+                )
