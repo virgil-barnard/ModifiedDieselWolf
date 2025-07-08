@@ -9,7 +9,7 @@ def test_build_mobile_rat(tmp_path):
         "backbone": "ConfigurableMobileRaT",
         "seq_len": 32,
         "num_classes": 3,
-        "params": {"d_model": 16, "nhead": 2, "num_layers": 1},
+        "params": {"nhead": 2, "num_layers": 1},
     }
     path = tmp_path / "cfg.yaml"
     path.write_text(yaml.safe_dump(cfg))
