@@ -3,7 +3,8 @@ import torch
 from torch import nn
 
 from ..complex_layers import ComplexLinear, ComplexLayerNorm
-        
+
+
 class SinusoidalPositionalEncoding(nn.Module):
     """Sinusoidal position embeddings for complex inputs."""
 
@@ -77,10 +78,16 @@ class ComplexTransformerEncoder(nn.Module):
         seq_len: int | None = None,
     ) -> None:
         super().__init__()
-        layer = ComplexTransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
         self.layers = nn.ModuleList(
-            [ComplexTransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
-             for _ in range(num_layers)]
+            [
+                ComplexTransformerEncoderLayer(
+                    d_model,
+                    nhead,
+                    dim_feedforward,
+                    dropout,
+                )
+                for _ in range(num_layers)
+            ]
         )
         if seq_len is not None:
             self.pos_enc = SinusoidalPositionalEncoding(d_model * 2, seq_len)

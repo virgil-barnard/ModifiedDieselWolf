@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
+from ray.tune.search.bayesopt import BayesOptSearch
 from dieselwolf.callbacks import ConfusionMatrixCallback
 from torch.utils.data import DataLoader
 import torch
@@ -25,17 +26,21 @@ def train_cnn(config: dict) -> None:
         return_message=False,
         transform=AWGN(20),
     )
-    train_loader = DataLoader(train_ds, batch_size=config["batch_size"], shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=config["batch_size"])
+    train_loader = DataLoader(
+        train_ds, batch_size=int(config["batch_size"]), shuffle=True
+    )
+    val_loader = DataLoader(val_ds, batch_size=int(config["batch_size"]))
 
     cm_callback = ConfusionMatrixCallback(val_loader, log_tag="val_confusion_matrix")
 
+    act_options = ["relu", "leakyrelu", "tanh"]
     backbone = ConfigurableCNN(
         seq_len=config["num_samples"],
         num_classes=len(train_ds.classes),
-        conv_channels=[config["channels1"], config["channels2"]],
-        kernel_sizes=[config["kernel1"], config["kernel2"]],
+        conv_channels=[int(config["channels1"]), int(config["channels2"])],
+        kernel_sizes=[int(config["kernel1"]), int(config["kernel2"])],
         dropout=config["dropout"],
+        activation=act_options[int(config["activation_idx"])],
     )
     model = AMRClassifier(
         backbone,
@@ -108,23 +113,27 @@ def main() -> None:
         "epochs": args.epochs,
         "num_examples": args.num_examples,
         "num_samples": args.num_samples,
-        "batch_size": tune.choice([16, 32]),
+        "batch_size": tune.uniform(16, 32),
         "lr": tune.loguniform(1e-4, 1e-2),
-        "channels1": tune.choice([16, 32, 64]),
-        "channels2": tune.choice([32, 64, 128]),
-        "kernel1": tune.choice([3, 5]),
-        "kernel2": tune.choice([3, 5]),
+        "channels1": tune.uniform(16, 64),
+        "channels2": tune.uniform(32, 128),
+        "kernel1": tune.uniform(3, 5),
+        "kernel2": tune.uniform(3, 5),
         "dropout": tune.uniform(0.0, 0.5),
-        "adv_eps": tune.choice(args.adv_eps),
-        "adv_weight": tune.choice(args.adv_weight),
-        "adv_norm": tune.choice(args.adv_norm),
+        "activation_idx": tune.uniform(0, 2),
+        "adv_eps": tune.uniform(min(args.adv_eps), max(args.adv_eps)),
+        "adv_weight": tune.uniform(min(args.adv_weight), max(args.adv_weight)),
+        "adv_norm": float("inf"),
         "log_dir": args.log_dir,
     }
+
+    search_alg = BayesOptSearch(metric="val_loss", mode="min")
 
     tune.run(
         train_cnn,
         resources_per_trial={"cpu": 1, "gpu": 1 if torch.cuda.is_available() else 0},
         config=config,
+        search_alg=search_alg,
         num_samples=args.max_trials,
         storage_path=args.log_dir,
         name="cnn_tuning",
