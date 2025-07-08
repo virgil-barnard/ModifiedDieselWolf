@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
+from dieselwolf.callbacks import ConfusionMatrixCallback
 from torch.utils.data import DataLoader
 import torch
 
@@ -26,6 +27,8 @@ def train_cnn(config: dict) -> None:
     )
     train_loader = DataLoader(train_ds, batch_size=config["batch_size"], shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=config["batch_size"])
+
+    cm_callback = ConfusionMatrixCallback(val_loader, log_tag="val_confusion_matrix")
 
     backbone = ConfigurableCNN(
         seq_len=config["num_samples"],
@@ -51,7 +54,8 @@ def train_cnn(config: dict) -> None:
         callbacks=[
             TuneReportCallback(
                 {"val_loss": "val_loss", "val_acc": "val_acc"}, on="validation_end"
-            )
+            ),
+            cm_callback,
         ],
         accelerator="auto",
         devices=1,
@@ -74,7 +78,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--num-samples", type=int, default=512)
     p.add_argument("--max-trials", type=int, default=20)
     p.add_argument(
-        "--adv-eps", type=float, nargs="+", default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5], help="Adversarial eps values"
+        "--adv-eps",
+        type=float,
+        nargs="+",
+        default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+        help="Adversarial eps values",
     )
     p.add_argument(
         "--adv-weight",
