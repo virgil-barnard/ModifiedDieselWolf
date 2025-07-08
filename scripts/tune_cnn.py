@@ -1,6 +1,8 @@
 import argparse
+import time
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import EarlyStopping
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 from ray.tune.search.bayesopt import BayesOptSearch
@@ -63,11 +65,22 @@ def train_cnn(config: dict) -> None:
                 {"val_loss": "val_loss", "val_acc": "val_acc"}, on="validation_end"
             ),
             cm_callback,
+            EarlyStopping(monitor="val_loss", mode="min", patience=5),
         ],
         accelerator="auto",
         devices=1,
     )
+    start_time = time.time()
     trainer.fit(model, train_loader, val_loader)
+    train_time = time.time() - start_time
+    metrics = {
+        "val_loss": float(trainer.callback_metrics.get("val_loss", 0.0)),
+        "val_acc": float(trainer.callback_metrics.get("val_acc", 0.0)),
+        "train_loss": float(trainer.callback_metrics.get("train_loss", 0.0)),
+        "train_acc": float(trainer.callback_metrics.get("train_acc", 0.0)),
+        "train_time": train_time,
+    }
+    logger.log_hyperparams(config, metrics)
 
 
 def _float_or_inf(value: str) -> float:
