@@ -176,6 +176,7 @@ class LatentSpaceCallback(pl.Callback):
             os.makedirs(output_dir, exist_ok=True)
         self.best_loss = float("inf")
         self.best_epoch = -1
+        self.class_names = getattr(dataloader.dataset, "classes", None)
 
     def _extract_features(
         self, pl_module: pl.LightningModule, x: torch.Tensor
@@ -212,6 +213,10 @@ class LatentSpaceCallback(pl.Callback):
                         "label": batch["label"][i].cpu(),
                         "metadata": {},
                     }
+                    if self.class_names is not None:
+                        label_idx = int(rec["label"].item())
+                        if 0 <= label_idx < len(self.class_names):
+                            rec["class_name"] = str(self.class_names[label_idx])
                     meta = batch.get("metadata")
                     if meta:
                         rec["metadata"] = {
@@ -241,10 +246,27 @@ class LatentSpaceCallback(pl.Callback):
                 torch.save({"epoch": self.best_epoch, "records": records}, path)
             if trainer.logger and hasattr(trainer.logger, "experiment"):
                 embeddings = torch.stack([r["embedding"] for r in records])
-                metadata = [str(r["label"].item()) for r in records]
+                rows = []
+                for r in records:
+                    label_name = r.get("class_name")
+                    if label_name is None:
+                        idx = int(r["label"].item())
+                        if self.class_names is not None and 0 <= idx < len(
+                            self.class_names
+                        ):
+                            label_name = str(self.class_names[idx])
+                        else:
+                            label_name = str(idx)
+                    snr = None
+                    if isinstance(r.get("metadata"), dict):
+                        snr = r["metadata"].get("SNRdB")
+                        if isinstance(snr, torch.Tensor):
+                            snr = snr.item()
+                    rows.append([label_name, snr])
                 trainer.logger.experiment.add_embedding(
                     embeddings,
-                    metadata=metadata,
+                    metadata=rows,
+                    metadata_header=["class", "SNRdB"],
                     global_step=self.best_epoch,
                     tag=self.log_tag,
                 )
