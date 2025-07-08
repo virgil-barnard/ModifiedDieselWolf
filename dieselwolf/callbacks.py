@@ -36,8 +36,11 @@ class SNRCurriculumCallback(pl.Callback):
             return
         if hasattr(t, "SNRdB"):
             t.SNRdB = self.current_snr
-        if hasattr(t, "low") and hasattr(t, "hi"):
-            t.low = t.hi = self.current_snr
+        if hasattr(t, "low"):
+            t.low = self.current_snr
+        if hasattr(t, "hi") and not hasattr(t, "SNRdB"):
+            t.hi = self.current_snr
+        print(f"[SNR callback] Set SNR to {self.current_snr} dB")
 
     def on_train_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
@@ -80,10 +83,14 @@ class ConfusionMatrixCallback(pl.Callback):
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
 
-    def _evaluate(self, pl_module: pl.LightningModule) -> torch.Tensor:
+    def _evaluate(
+        self, pl_module: pl.LightningModule
+    ) -> tuple[torch.Tensor, float, float, float]:
         pl_module.eval()
         preds: List[int] = []
         targets: List[int] = []
+        losses: List[torch.Tensor] = []
+        snrs: List[torch.Tensor] = []
         device = pl_module.device
         with torch.no_grad():
             for batch in self.dataloader:
@@ -92,13 +99,22 @@ class ConfusionMatrixCallback(pl.Callback):
                 logits = pl_module(x)
                 preds.extend(logits.argmax(dim=1).cpu().tolist())
                 targets.extend(y.cpu().tolist())
-        return torch.tensor(
+                losses.append(pl_module.criterion(logits, y).cpu())
+                if "metadata" in batch and "SNRdB" in batch["metadata"]:
+                    snrs.append(batch["metadata"]["SNRdB"].float().mean().cpu())
+        cm = torch.tensor(
             sk_confusion_matrix(
                 targets, preds, labels=list(range(len(self.dataloader.dataset.classes)))
             )
         )
+        acc = (cm.diagonal().sum() / cm.sum()).item() if cm.sum() > 0 else 0.0
+        loss = torch.stack(losses).mean().item() if losses else 0.0
+        avg_snr = torch.stack(snrs).mean().item() if snrs else float("nan")
+        return cm, loss, acc, avg_snr
 
-    def _plot(self, cm: torch.Tensor) -> plt.Figure:
+    def _plot(
+        self, cm: torch.Tensor, loss: float, acc: float, avg_snr: float
+    ) -> plt.Figure:
         fig, ax = plt.subplots(figsize=(6, 5))
         im = ax.imshow(cm, cmap="Blues")
         classes = self.dataloader.dataset.classes
@@ -121,6 +137,10 @@ class ConfusionMatrixCallback(pl.Callback):
         ax.set_yticklabels(classes, fontsize=8)
         ax.set_xlabel("Predicted")
         ax.set_ylabel("True")
+        title = f"Loss: {loss:.4f}  Acc: {acc*100:.2f}%"
+        if not torch.isnan(torch.tensor(avg_snr)):
+            title += f"  Avg SNR: {avg_snr:.1f} dB"
+        ax.set_title(title)
         fig.colorbar(im, ax=ax)
         fig.tight_layout()
         return fig
@@ -128,8 +148,8 @@ class ConfusionMatrixCallback(pl.Callback):
     def on_validation_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
-        cm = self._evaluate(pl_module)
-        fig = self._plot(cm)
+        cm, loss, acc, avg_snr = self._evaluate(pl_module)
+        fig = self._plot(cm, loss, acc, avg_snr)
         if self.output_dir:
             path = os.path.join(self.output_dir, f"epoch_{trainer.current_epoch}.png")
             fig.savefig(path)
