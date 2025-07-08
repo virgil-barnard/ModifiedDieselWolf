@@ -12,3 +12,4 @@ torchmetrics
 onnxruntime==1.22.0
 ray[tune]
 tensorboard
+bayesian-optimization

@@ -1,8 +1,6 @@
-import pytest
 import subprocess
 import torch
 from dieselwolf.models import AMRClassifier, ConfigurableCNN
-
 
 
 def test_benchmark_onnx(tmp_path):
