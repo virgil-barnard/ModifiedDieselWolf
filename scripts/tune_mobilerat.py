@@ -1,6 +1,8 @@
 import argparse
+import time
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import EarlyStopping
 from ray import tune
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 from ray.tune.search.bayesopt import BayesOptSearch
@@ -35,13 +37,16 @@ def train_mobile_rat(config: dict) -> None:
 
     act_options = ["relu", "leakyrelu", "tanh"]
     pool_options = ["max", "avg", "lp", "adaptive"]
+    nhead = max(1, int(config["nhead"]))
+    if (2 * int(config["channels2"])) % nhead != 0:
+        nhead = 1
     backbone = ConfigurableMobileRaT(
         seq_len=config["num_samples"],
         num_classes=len(train_ds.classes),
         conv_channels=[int(config["channels1"]), int(config["channels2"])],
         kernel_sizes=[int(config["kernel1"]), int(config["kernel2"])],
         dropout=config["dropout"],
-        nhead=int(config["nhead"]),
+        nhead=nhead,
         num_layers=int(config["num_layers"]),
         activation=act_options[int(config["activation_idx"])],
         pooling=pool_options[int(config["pool_idx"])],
@@ -65,11 +70,22 @@ def train_mobile_rat(config: dict) -> None:
                 {"val_loss": "val_loss", "val_acc": "val_acc"}, on="validation_end"
             ),
             cm_callback,
+            EarlyStopping(monitor="val_loss", mode="min", patience=5),
         ],
         accelerator="auto",
         devices=1,
     )
+    start_time = time.time()
     trainer.fit(model, train_loader, val_loader)
+    train_time = time.time() - start_time
+    metrics = {
+        "val_loss": float(trainer.callback_metrics.get("val_loss", 0.0)),
+        "val_acc": float(trainer.callback_metrics.get("val_acc", 0.0)),
+        "train_loss": float(trainer.callback_metrics.get("train_loss", 0.0)),
+        "train_acc": float(trainer.callback_metrics.get("train_acc", 0.0)),
+        "train_time": train_time,
+    }
+    logger.log_hyperparams(config, metrics)
 
 
 def _float_or_inf(value: str) -> float:
