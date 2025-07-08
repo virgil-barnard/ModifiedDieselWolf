@@ -16,7 +16,7 @@ def test_build_mobile_rat(tmp_path):
     model = build_backbone(path)
     x = torch.randn(1, 2, 32)
     out = model(x)
-    assert isinstance(model, MobileRaT)
+    assert isinstance(model, ConfigurableMobileRaT)
     assert out.shape == (1, 3)
 
 
@@ -31,5 +31,5 @@ def test_build_cnn(tmp_path):
     model = build_backbone(path)
     x = torch.randn(1, 2, 32)
     out = model(x)
-    assert isinstance(model, NMformer)
+    assert isinstance(model, ConfigurableCNN)
     assert out.shape == (1, 4)
