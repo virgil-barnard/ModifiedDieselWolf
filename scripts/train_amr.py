@@ -6,6 +6,7 @@ from pytorch_lightning.callbacks import (
     ModelCheckpoint,
     EMA,
 )
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from dieselwolf.callbacks import SNRCurriculumCallback
 from dieselwolf.data.TransformsRF import AWGN
@@ -89,7 +90,39 @@ def parse_args() -> argparse.Namespace:
         default=0.0,
         help="Dropout probability between conv layers",
     )
+    parser.add_argument(
+        "--adv-eps",
+        type=float,
+        default=0.0,
+        help="FGSM epsilon for adversarial training",
+    )
+    parser.add_argument(
+        "--adv-weight",
+        type=float,
+        default=0.5,
+        help="Adversarial loss weight",
+    )
+    parser.add_argument(
+        "--adv-norm",
+        type=_float_or_inf,
+        default=float("inf"),
+        help="Norm for adversarial gradients (e.g. 2 or inf)",
+    )
+    parser.add_argument(
+        "--log-dir",
+        type=str,
+        default="/app/ray_results",
+        help="Directory for TensorBoard logs",
+    )
     return parser.parse_args()
+
+
+def _float_or_inf(value: str) -> float:
+    """Parse a float value that may be 'inf'."""
+
+    if value == "inf":
+        return float("inf")
+    return float(value)
 
 
 def main() -> None:
@@ -130,6 +163,9 @@ def main() -> None:
         num_classes=len(train_ds.classes),
         lr=args.lr,
         warmup_steps=args.warmup_steps,
+        adv_eps=args.adv_eps,
+        adv_weight=args.adv_weight,
+        adv_norm=args.adv_norm,
     )
     if args.ssl_checkpoint:
         model.load_moco_weights(args.ssl_checkpoint)
@@ -145,10 +181,12 @@ def main() -> None:
             train_ds, start_snr=args.snr_start, patience=args.snr_patience
         )
     )
+    logger = TensorBoardLogger(save_dir=args.log_dir, name="")
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         precision=args.precision,
         callbacks=callbacks,
+        logger=logger,
         accelerator="auto",
         devices=1,
         accumulate_grad_batches=args.accumulate_grad_batches,
