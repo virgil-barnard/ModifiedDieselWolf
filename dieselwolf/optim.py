@@ -66,3 +66,8 @@ class Lookahead(Optimizer):
     @property
     def state(self) -> Dict:
         return self.optimizer.state
+
+    @property
+    def defaults(self) -> Dict:
+        """Return defaults of the wrapped optimizer."""
+        return getattr(self.optimizer, "defaults", {})
