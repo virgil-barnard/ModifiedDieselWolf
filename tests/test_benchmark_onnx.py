@@ -3,7 +3,6 @@ import subprocess
 import torch
 from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
-pytest.importorskip("onnx")
 
 
 def test_benchmark_onnx(tmp_path):

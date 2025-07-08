@@ -19,10 +19,10 @@ class CarrierPhase(object):  # carrier phase offset transform.
             if not self.keys:  # NO BATCH, NO KEYS
                 tensor = item["data"]
                 rot = torch.tensor(
-                    [
+                    np.array([
                         [np.cos(self.rads), np.sin(self.rads)],
                         [-np.sin(self.rads), np.cos(self.rads)],
-                    ]
+                    ])
                 )
                 tensor_prime = torch.mm(rot, tensor)
                 item["data"] = tensor_prime
@@ -31,10 +31,10 @@ class CarrierPhase(object):  # carrier phase offset transform.
                 for key in self.keys:
                     tensor = item[key]
                     rot = torch.tensor(
-                        [
+                        np.array([
                             [np.cos(self.rads), np.sin(self.rads)],
                             [-np.sin(self.rads), np.cos(self.rads)],
-                        ]
+                        ])
                     )
                     tensor_prime = torch.mm(rot, tensor)
                     item[key] = tensor_prime
@@ -46,10 +46,10 @@ class CarrierPhase(object):  # carrier phase offset transform.
                 if not self.keys:  # WITH BATCH, NO KEYS
                     tensor = item["data"][idx]
                     rot = torch.tensor(
-                        [
+                        np.array([
                             [np.cos(self.rads), np.sin(self.rads)],
                             [-np.sin(self.rads), np.cos(self.rads)],
-                        ]
+                        ])
                     )
                     tensor_prime = torch.mm(rot, tensor)
                     item["data"][idx] = tensor_prime
@@ -58,10 +58,10 @@ class CarrierPhase(object):  # carrier phase offset transform.
                     for key in self.keys:
                         tensor = item[key][idx]
                         rot = torch.tensor(
-                            [
+                            np.array([
                                 [np.cos(self.rads), np.sin(self.rads)],
                                 [-np.sin(self.rads), np.cos(self.rads)],
-                            ]
+                            ])
                         )
                         tensor_prime = torch.mm(rot, tensor)
                         item[key][idx] = tensor_prime
@@ -104,10 +104,10 @@ class RandomCarrierPhase(object):  # random carrier phase offset transform.
             if not self.keys:  # NO BATCH, NO KEYS
                 tensor = item["data"]
                 rot = torch.tensor(
-                    [
+                    np.array([
                         [np.cos(self.rads), np.sin(self.rads)],
                         [-np.sin(self.rads), np.cos(self.rads)],
-                    ]
+                    ])
                 ).float()
                 tensor_prime = torch.mm(rot, tensor)
                 item["data"] = tensor_prime
@@ -116,10 +116,10 @@ class RandomCarrierPhase(object):  # random carrier phase offset transform.
                 for key in self.keys:
                     tensor = item[key]
                     rot = torch.tensor(
-                        [
+                        np.array([
                             [np.cos(self.rads), np.sin(self.rads)],
                             [-np.sin(self.rads), np.cos(self.rads)],
-                        ]
+                        ])
                     ).float()
                     tensor_prime = torch.mm(rot, tensor)
                     item[key] = tensor_prime
@@ -133,10 +133,10 @@ class RandomCarrierPhase(object):  # random carrier phase offset transform.
                 if not self.keys:  # WITH BATCH, NO KEYS
                     tensor = item["data"][idx]
                     rot = torch.tensor(
-                        [
+                        np.array([
                             [np.cos(self.rads), np.sin(self.rads)],
                             [-np.sin(self.rads), np.cos(self.rads)],
-                        ]
+                        ])
                     ).float()
                     tensor_prime = torch.mm(rot, tensor)
                     item["data"][idx] = tensor_prime
@@ -145,10 +145,10 @@ class RandomCarrierPhase(object):  # random carrier phase offset transform.
                     for key in self.keys:
                         tensor = item[key][idx]
                         rot = torch.tensor(
-                            [
+                            np.array([
                                 [np.cos(self.rads), np.sin(self.rads)],
                                 [-np.sin(self.rads), np.cos(self.rads)],
-                            ]
+                            ])
                         ).float()
                         tensor_prime = torch.mm(rot, tensor)
                         item[key][idx] = tensor_prime
@@ -188,7 +188,7 @@ class CarrierFrequency(object):  # carrier frequency + phase offset transform.
                     ).astype(np.float32)
                     x = self.rads + 2 * np.pi * self.df * times
                     rot = torch.tensor(
-                        [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                        np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                     )
                     tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                     item[key] = tensor_prime
@@ -205,7 +205,7 @@ class CarrierFrequency(object):  # carrier frequency + phase offset transform.
                     ).astype(np.float32)
                     x = self.rads + 2 * np.pi * self.df * times
                     rot = torch.tensor(
-                        [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                        np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                     )
                     tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                     item["data"][idx] = tensor_prime
@@ -218,7 +218,7 @@ class CarrierFrequency(object):  # carrier frequency + phase offset transform.
                         ).astype(np.float32)
                         x = self.rads + 2 * np.pi * self.df * times
                         rot = torch.tensor(
-                            [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                            np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                         )
                         tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                         item["data"][idx] = tensor_prime
@@ -283,7 +283,7 @@ class RandomCarrierFrequency(
                 )
                 x = self.rads + 2 * np.pi * self.df * times
                 rot = torch.tensor(
-                    [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                    np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                 ).float()
                 tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                 item["data"] = tensor_prime
@@ -296,7 +296,7 @@ class RandomCarrierFrequency(
                     ).astype(np.float32)
                     x = self.rads + 2 * np.pi * self.df * times
                     rot = torch.tensor(
-                        [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                        np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                     ).float()
                     tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                     item[key] = tensor_prime
@@ -318,7 +318,7 @@ class RandomCarrierFrequency(
                     ).astype(np.float32)
                     x = self.rads + 2 * np.pi * self.df * times
                     rot = torch.tensor(
-                        [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                        np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                     ).float()
                     tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                     item["data"][idx] = tensor_prime
@@ -331,7 +331,7 @@ class RandomCarrierFrequency(
                         ).astype(np.float32)
                         x = self.rads + 2 * np.pi * self.df * times
                         rot = torch.tensor(
-                            [[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]]
+                            np.array([[np.cos(x), np.sin(x)], [-np.sin(x), np.cos(x)]])
                         ).float()
                         tensor_prime = torch.einsum("ijk,ik->jk", rot, tensor)
                         item["data"][idx] = tensor_prime
