@@ -34,6 +34,7 @@ def train_cnn(config: dict) -> None:
     cm_callback = ConfusionMatrixCallback(val_loader, log_tag="val_confusion_matrix")
 
     act_options = ["relu", "leakyrelu", "tanh"]
+    pool_options = ["max", "avg", "lp", "adaptive"]
     backbone = ConfigurableCNN(
         seq_len=config["num_samples"],
         num_classes=len(train_ds.classes),
@@ -41,6 +42,7 @@ def train_cnn(config: dict) -> None:
         kernel_sizes=[int(config["kernel1"]), int(config["kernel2"])],
         dropout=config["dropout"],
         activation=act_options[int(config["activation_idx"])],
+        pooling=pool_options[int(config["pool_idx"])],
     )
     model = AMRClassifier(
         backbone,
@@ -109,6 +111,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    act_options = ["relu", "leakyrelu", "tanh"]
+    pool_options = ["max", "avg", "lp", "adaptive"]
+
     config = {
         "epochs": args.epochs,
         "num_examples": args.num_examples,
@@ -120,14 +125,20 @@ def main() -> None:
         "kernel1": tune.uniform(3, 5),
         "kernel2": tune.uniform(3, 5),
         "dropout": tune.uniform(0.0, 0.5),
-        "activation_idx": tune.uniform(0, 2),
+        "activation_idx": tune.uniform(-0.5, len(act_options) - 0.5),
+        "pool_idx": tune.uniform(-0.5, len(pool_options) - 0.5),
         "adv_eps": tune.uniform(min(args.adv_eps), max(args.adv_eps)),
         "adv_weight": tune.uniform(min(args.adv_weight), max(args.adv_weight)),
         "adv_norm": float("inf"),
         "log_dir": args.log_dir,
     }
 
-    search_alg = BayesOptSearch(metric="val_loss", mode="min")
+    try:
+        search_alg = BayesOptSearch(
+            metric="val_loss", mode="min", random_search_steps=10
+        )
+    except Exception:
+        search_alg = None
 
     tune.run(
         train_cnn,
