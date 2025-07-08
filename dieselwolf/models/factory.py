@@ -8,11 +8,15 @@ from torch import nn
 
 from .configurable_cnn import ConfigurableCNN
 from .configurable_mobile_rat import ConfigurableMobileRaT
+from .mobile_rat import MobileRaT
+from .nmformer import NMformer
 
 
 _BACKBONES = {
     "ConfigurableMobileRaT": ConfigurableMobileRaT,
     "ConfigurableCNN": ConfigurableCNN,
+    "MobileRaT": MobileRaT,
+    "NMformer": NMformer,
 }
 
 
