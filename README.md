@@ -28,10 +28,15 @@ TensorBoard includes embedding projections of the best model from each trial.
 
 ## Repository Highlights
 
-- **Augmentations:** `dieselwolf/data/augmentations.py` provides `RandomCrop`, `IQSwap` and `RFAugment` which combines random CFO, cropping and IQ swap.
+- **Augmentations:** `dieselwolf/data/TransformsRF.py` includes fractional resampling with `DopplerShift` and fading models `TDLRayleigh`, `TDLRician` and `TDLNakagami`.
 - **Quantisation:** convert checkpoints with `scripts/export_onnx.py` and `scripts/quantize_onnx.py`.
 - **Tutorial notebooks:** see the `notebooks/` directory for dataset walkthroughs and training examples.
-- Additional transformations for channel simulation live in `dieselwolf/data/TransformsRF.py`.
+- **Complex models:** `dieselwolf/complex_layers.py` and `dieselwolf/models/complex_transformer.py` enable complex-valued networks such as `configurable_mobile_rat.py`.
+- **Modular architectures:** `dieselwolf/models/configurable_cnn.py` and `dieselwolf/models/configurable_mobile_rat.py` expose a modular design for easy tuning.
+- **Lightning module:** `dieselwolf/models/lightning_module.py` wraps a backbone with projection heads for metadata regression and supports fast-gradient adversarial perturbations.
+- **Insightful callbacks:** `dieselwolf/callbacks.py` generates embedding projections with metadata and logs a confusion matrix image to TensorBoard.
+- **MoCo-v3 pre-training:** `dieselwolf/models/moco_v3.py` implements a lightweight momentum encoder for semi-supervised learning on unlabeled RF data.
+- **CI/CD practices:** GitHub workflows and pre-commit hooks with `ruff` and `black` enforce consistent formatting and smoke-test training.
 
 ## Demo
 
