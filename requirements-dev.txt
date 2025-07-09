@@ -12,6 +12,7 @@ black==25.1.0
 ruff==0.4.3
 pytest
 onnxruntime==1.22.0
+onnx
 ray[tune]
 tensorboard
-bayesian-optimization
+bayesian-optimization==1.4.3

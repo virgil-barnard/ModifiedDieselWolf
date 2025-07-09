@@ -252,7 +252,7 @@ class LatentSpaceCallback(pl.Callback):
         if checkpoint_cb is not None:
             ckpt_path = checkpoint_cb.best_model_path or ckpt_path
         if ckpt_path and os.path.isfile(ckpt_path):
-            state = torch.load(ckpt_path, map_location=pl_module.device)
+            state = torch.load(ckpt_path, map_location=pl_module.device, weights_only=False)
             if "state_dict" in state:
                 pl_module.load_state_dict(state["state_dict"])
             else:

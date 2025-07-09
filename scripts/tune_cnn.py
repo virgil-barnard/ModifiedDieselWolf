@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 import torch
 
 from dieselwolf.data import DigitalModulationDataset
-from dieselwolf.data.TransformsRF import AWGN
+from dieselwolf.data.TransformsRF import AWGN, RandomAWGN
 from dieselwolf.models import AMRClassifier, ConfigurableCNN
 
 
@@ -21,20 +21,25 @@ def train_cnn(config: dict) -> None:
         num_examples=config["num_examples"],
         num_samples=config["num_samples"],
         return_message=False,
-        transform=AWGN(20),
+        transform=RandomAWGN(0, 30),
     )
     val_ds = DigitalModulationDataset(
         num_examples=max(1, config["num_examples"] // 4),
         num_samples=config["num_samples"],
         return_message=False,
-        transform=AWGN(20),
+        transform=RandomAWGN(0, 30),
     )
-    train_loader = DataLoader(
-        train_ds, batch_size=int(config["batch_size"]), shuffle=True
-    )
-    val_loader = DataLoader(val_ds, batch_size=int(config["batch_size"]))
+    latent_ds = DigitalModulationDataset(
+        num_examples=max(1, config["num_examples"] // 16),
+        num_samples=config["num_samples"],
+        return_message=False,
+        transform=RandomAWGN(0, 30),
+    )    
+    train_loader = DataLoader(train_ds, batch_size=int(config["batch_size"]), shuffle=True, num_workers=16)
+    val_loader = DataLoader(val_ds, batch_size=int(config["batch_size"]), num_workers=16)
+    latent_loader = DataLoader(latent_ds, batch_size=int(config["batch_size"]), num_workers=16)
 
-    cm_callback = ConfusionMatrixCallback(val_loader, log_tag="val_confusion_matrix")
+    cm_callback = ConfusionMatrixCallback(latent_loader, log_tag="val_confusion_matrix")
 
     act_options = ["relu", "leakyrelu", "tanh"]
     pool_options = ["max", "avg", "lp", "adaptive"]
@@ -74,7 +79,7 @@ def train_cnn(config: dict) -> None:
             cm_callback,
             latent_cb,
             ckpt_cb,
-            EarlyStopping(monitor="val_loss", mode="min", patience=5),
+            EarlyStopping(monitor="val_loss", mode="min", patience=5, min_delta=0.001),
         ],
         accelerator="auto",
         devices=1,
@@ -105,19 +110,19 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--epochs", type=int, default=20)
     p.add_argument("--num-examples", type=int, default=2**12)
     p.add_argument("--num-samples", type=int, default=512)
-    p.add_argument("--max-trials", type=int, default=20)
+    p.add_argument("--max-trials", type=int, default=200)
     p.add_argument(
         "--adv-eps",
         type=float,
         nargs="+",
-        default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+        default=[0.0, 50.0],
         help="Adversarial eps values",
     )
     p.add_argument(
         "--adv-weight",
         type=float,
         nargs="+",
-        default=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+        default=[0.0, 0.5],
         help="Adversarial loss weight values",
     )
     p.add_argument(
@@ -144,8 +149,8 @@ def main() -> None:
         "lr": tune.loguniform(1e-4, 1e-2),
         "channels1": tune.uniform(16, 64),
         "channels2": tune.uniform(32, 128),
-        "kernel1": tune.uniform(3, 5),
-        "kernel2": tune.uniform(3, 5),
+        "kernel1": tune.uniform(3, 15),
+        "kernel2": tune.uniform(3, 15),
         "dropout": tune.uniform(0.0, 0.5),
         "activation_idx": tune.uniform(-0.5, len(act_options) - 0.5),
         "pool_idx": tune.uniform(-0.5, len(pool_options) - 0.5),

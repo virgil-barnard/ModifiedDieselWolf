@@ -79,7 +79,7 @@ def train_mobile_rat(config: dict) -> None:
             cm_callback,
             latent_cb,
             ckpt_cb,
-            EarlyStopping(monitor="val_loss", mode="min", patience=5),
+            EarlyStopping(monitor="val_loss", mode="min", patience=5, min_delta=.001),
         ],
         accelerator="auto",
         devices=1,
