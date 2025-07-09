@@ -39,7 +39,7 @@ def train_cnn(config: dict) -> None:
     val_loader = DataLoader(val_ds, batch_size=int(config["batch_size"]), num_workers=16)
     latent_loader = DataLoader(latent_ds, batch_size=int(config["batch_size"]), num_workers=16)
 
-    cm_callback = ConfusionMatrixCallback(latent_loader, log_tag="val_confusion_matrix")
+    cm_callback = ConfusionMatrixCallback(val_loader, log_tag="val_confusion_matrix")
 
     act_options = ["relu", "leakyrelu", "tanh"]
     pool_options = ["max", "avg", "lp", "adaptive"]
@@ -63,7 +63,7 @@ def train_cnn(config: dict) -> None:
 
     logger = TensorBoardLogger(save_dir=config["log_dir"], name="")
     latent_cb = LatentSpaceCallback(
-        val_loader,
+        latent_loader,
         output_dir=os.path.join(logger.log_dir, "latent_space"),
         log_tag="val_latent",
     )
