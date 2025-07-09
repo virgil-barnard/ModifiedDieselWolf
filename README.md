@@ -38,4 +38,4 @@ TensorBoard includes embedding projections of the best model from each trial.
 ![Confusion matrices](demo_pics/confusion_images.png)
 ![Parallel coordinates](demo_pics/parallel_coords.png)
 ![Training curves](demo_pics/scalars.png)
-<video src="demo_pics/projector.mp4" width="600" controls></video>
+<video src="https://raw.githubusercontent.com/virgil-barnard/ModifiedDieselWolf/main/demo_pics/projector.mp4" width="600" controls></video>
